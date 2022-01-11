@@ -1,6 +1,6 @@
 {
     "name": "dex/frontier",
-    "description": "The frontier between your Laravel app and your frontend",
+    "description": "The frontier between your Laravel app and your decoupled frontend",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -27,12 +27,12 @@
     "scripts-descriptions": {
         "tests": "Run tests"
     },
+    "require": {
+        "illuminate/support": "^8.78"
+    },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
         "orchestra/testbench": "^6.23"
-    },
-    "require": {
-        "illuminate/support": "^8.78"
     },
     "extra": {
         "laravel": {
