@@ -13,7 +13,7 @@ backend. You will be able to test your app using cookies, sessions and avoiding 
 
 ## Installation
 
-Just install `dex/frontier` into your Laravel app and configure some 
+Just install `dex/frontier` into your Laravel app and configure some
 [environment variables](https://github.com/edersoares/frontier#environment-variables).
 
 ```bash 
@@ -29,8 +29,8 @@ You can configure your frontend using some environment variables described below
 | `FRONTIER_ENDPOINT` | Endpoint where the frontend will run | `frontier` |
 | `FRONTIER_VIEW` | Default `view` that will be rendered | `frontier::index` |
 | `FRONTIER_VIEWS` | Directory where all the `views` are | `frontier/resources/html` |
-| `FRONTIER_REPLACE_FROM` | Content that will be replaced in the `view` |  |
-| `FRONTIER_REPLACE_TO` | Content that will be putted in the `view` |  |
+| `FRONTIER_FIND` | Content that will be replaced in the `view` |  |
+| `FRONTIER_REPLACE_WITH` | Content that will be the replacement |  |
 
 ### Multiple frontends
 
