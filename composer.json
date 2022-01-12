@@ -28,7 +28,7 @@
         "tests": "Run tests"
     },
     "require": {
-        "illuminate/support": "^8.78"
+        "illuminate/support": "^8"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
