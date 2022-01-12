@@ -28,7 +28,7 @@ You can configure your frontend using some environment variables described below
 | --- | --- |---------------------------|
 | `FRONTIER_ENDPOINT` | Endpoint where the frontend will run | `frontier` |
 | `FRONTIER_VIEW` | Default `view` that will be rendered | `frontier::index` |
-| `FRONTIER_VIEWS` | Directory where all the `views` are | `frontier/resources/html` |
+| `FRONTIER_VIEWS_PATH` | Directory where all the `views` are | `frontier/resources/html` |
 | `FRONTIER_FIND` | Content that will be replaced in the `view` |  |
 | `FRONTIER_REPLACE_WITH` | Content that will be the replacement |  |
 
@@ -40,8 +40,8 @@ You can run multiple frontends, just create a custom configuration file.
 php artisan vendor:publish --tag=frontier
 ```
 
-The `config/frontier.php` file will be created in Laravel app. This file contains some settings that can be replicated
-to add more frontends to your app.
+The `config/frontier.php` file will be created in your Laravel app. This file contains some settings that can be 
+replicated to add more frontends to your app.
 
 ## License
 
