@@ -4,6 +4,7 @@ namespace Dex\Laravel\Frontier;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
 
 class FrontierServiceProvider extends ServiceProvider
 {
@@ -26,12 +27,20 @@ class FrontierServiceProvider extends ServiceProvider
 
     private function frontend($config)
     {
-        return Route::get($config['endpoint'] . '/{uri?}', FrontendController::class)
+        return Route::get($config['endpoint'] . '/{uri?}', $this->getControllerFromType($config['type']))
             ->middleware($config['middleware'] ?? [])
             ->where('uri', '.*')
             ->setDefaults([
                 'uri' => '',
                 'config' => $config,
             ]);
+    }
+
+    private function getControllerFromType(string $type): string
+    {
+        return match ($type) {
+            'view' => FrontendViewController::class,
+            default => throw new InvalidArgumentException('Unknown controller type'),
+        };
     }
 }
