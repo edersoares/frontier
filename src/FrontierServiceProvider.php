@@ -15,11 +15,11 @@ class FrontierServiceProvider extends ServiceProvider
         foreach ($this->app['config']->get('frontier') as $config) {
             $this->frontend($config);
 
-            foreach ($config['views'] as $namespace => $path) {
+            foreach ($config['views'] ?? [] as $namespace => $path) {
                 $this->loadViewsFrom($path, $namespace);
             }
 
-            foreach ($config['publishes'] as $groups => $paths) {
+            foreach ($config['publishes'] ?? [] as $groups => $paths) {
                 $this->publishes($paths, $groups);
             }
         }
@@ -39,6 +39,7 @@ class FrontierServiceProvider extends ServiceProvider
     private function getControllerFromType(string $type): string
     {
         return match ($type) {
+            'http' => FrontendHttpController::class,
             'view' => FrontendViewController::class,
             default => throw new InvalidArgumentException('Unknown controller type'),
         };
