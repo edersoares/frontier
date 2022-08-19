@@ -29,7 +29,6 @@ You can configure your frontend using some environment variables described below
 | `FRONTIER_ENDPOINT` | Endpoint where the frontend will run | `frontier` |
 | `FRONTIER_VIEW` | Default `view` that will be rendered | `frontier::index` |
 | `FRONTIER_VIEWS_PATH` | Directory where all the `views` are | `frontier/resources/html` |
-| `FRONTIER_VIEWS_PATH_HTTP` | Allow get all the `views` from a CDN or remote URL |  |
 | `FRONTIER_FIND` | Content that will be replaced in the `view` |  |
 | `FRONTIER_REPLACE_WITH` | Content that will be the replacement |  |
 
