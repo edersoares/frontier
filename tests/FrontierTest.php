@@ -21,6 +21,6 @@ class FrontierTest extends TestCase
     {
         $this->get('/view')
             ->assertStatus(200)
-            ->assertSeeText('Frontier');
+            ->assertSeeText('Frontier by View');
     }
 }
