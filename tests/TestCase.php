@@ -21,10 +21,7 @@ abstract class TestCase extends OrchestraTestCase
                 'http' => [
                     'type' => 'http',
                     'endpoint' => 'http',
-                    'url' => 'http://localhost',
-                    'headers' => [],
-                    'middleware' => [],
-                    'replaces' => [],
+                    'view' => 'http://localhost',
                 ],
                 'view' => [
                     'type' => 'view',
@@ -33,9 +30,6 @@ abstract class TestCase extends OrchestraTestCase
                     'views' => [
                         'frontier' => __DIR__ . '/../resources/html',
                     ],
-                    'publishes' => [],
-                    'middleware' => [],
-                    'replaces' => [],
                 ],
             ]
         ]);
