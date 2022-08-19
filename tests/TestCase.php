@@ -13,4 +13,25 @@ abstract class TestCase extends OrchestraTestCase
             FrontierServiceProvider::class,
         ];
     }
+
+    protected function defineEnvironment($app)
+    {
+        $app['config']->set([
+            'frontier' => [
+                'http' => [
+                    'type' => 'http',
+                    'endpoint' => 'http',
+                    'view' => 'http://localhost',
+                ],
+                'view' => [
+                    'type' => 'view',
+                    'endpoint' => 'view',
+                    'view' => 'frontier::index',
+                    'views' => [
+                        'frontier' => __DIR__ . '/../resources/html',
+                    ],
+                ],
+            ]
+        ]);
+    }
 }

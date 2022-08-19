@@ -4,6 +4,8 @@ return [
 
     'frontier' => [
 
+        'type' => env('FRONTIER_TYPE', 'view'),
+
         'endpoint' => env('FRONTIER_ENDPOINT', 'frontier'),
 
         'view' => env('FRONTIER_VIEW', 'frontier::index'),
