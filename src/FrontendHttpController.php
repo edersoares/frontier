@@ -8,8 +8,8 @@ class FrontendHttpController
 {
     public function __invoke($uri, $config)
     {
-        $content = Http::withHeaders($config['headers'])
-            ->get($config['url'])
+        $content = Http::withHeaders($config['headers'] ?? [])
+            ->get($config['view'])
             ->body();
 
         return str_replace(
