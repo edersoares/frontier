@@ -4,7 +4,7 @@ namespace Dex\Laravel\Frontier\Tests;
 
 use Illuminate\Support\Facades\Http;
 
-class FrontierTest extends TestCase
+class FrontendHttpControllerTest extends TestCase
 {
     protected string $storagePath;
 
@@ -43,12 +43,5 @@ class FrontierTest extends TestCase
         $this->get('/http')
             ->assertStatus(200)
             ->assertSeeText($text);
-    }
-
-    public function testViewController()
-    {
-        $this->get('/view')
-            ->assertStatus(200)
-            ->assertSeeText('Frontier by View');
     }
 }
