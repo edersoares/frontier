@@ -24,7 +24,7 @@ class FrontendHttpControllerTest extends TestCase
         exec('rm -R ' . $this->storagePath);
     }
 
-    public function testHttpController()
+    public function testHttpController(): void
     {
         $file = storage_path('frontier/http.html');
         $text = 'Frontier by HTTP';

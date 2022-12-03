@@ -7,14 +7,14 @@ use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase
 {
-    protected function getPackageProviders($app)
+    protected function getPackageProviders($app): array
     {
         return [
             FrontierServiceProvider::class,
         ];
     }
 
-    protected function defineEnvironment($app)
+    protected function defineEnvironment($app): void
     {
         $app['config']->set([
             'frontier' => [

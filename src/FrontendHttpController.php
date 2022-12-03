@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 
 class FrontendHttpController
 {
-    public function __invoke($uri, $config)
+    public function __invoke($uri, $config): string
     {
         $endpoint = trim($config['endpoint'], '/');
         $path = storage_path("frontier/$endpoint.html");
