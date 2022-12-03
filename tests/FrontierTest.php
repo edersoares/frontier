@@ -6,15 +6,43 @@ use Illuminate\Support\Facades\Http;
 
 class FrontierTest extends TestCase
 {
+    protected string $storagePath;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->storagePath = storage_path('frontier');
+
+        exec('mkdir -p ' . $this->storagePath);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        exec('rm -R ' . $this->storagePath);
+    }
+
     public function testHttpController()
     {
+        $file = storage_path('frontier/http.html');
+        $text = 'Frontier by HTTP';
+
         Http::fake([
-            'localhost' => Http::response('Frontier by HTTP'),
+            'localhost' => Http::response($text),
         ]);
 
         $this->get('/http')
             ->assertStatus(200)
-            ->assertSeeText('Frontier by HTTP');
+            ->assertSeeText($text);
+
+        $this->assertFileExists($file);
+        $this->assertStringEqualsFile($file, $text);
+
+        $this->get('/http')
+            ->assertStatus(200)
+            ->assertSeeText($text);
     }
 
     public function testViewController()
