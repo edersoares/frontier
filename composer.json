@@ -22,10 +22,12 @@
         }
     },
     "scripts": {
-        "tests": "vendor/bin/phpunit"
+        "tests": "vendor/bin/phpunit",
+        "tests:coverage": "vendor/bin/phpunit --coverage-html=.build/code-coverage"
     },
     "scripts-descriptions": {
-        "tests": "Run tests"
+        "tests": "Run tests",
+        "tests:coverage": "Run tests and code coverage"
     },
     "require": {
         "illuminate/support": "^8|^9"
