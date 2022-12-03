@@ -24,14 +24,26 @@ composer require dex/frontier
 
 You can configure your frontend using some environment variables described below.
 
-| Variable                | Description                                 | Default                   |
-|-------------------------|---------------------------------------------|---------------------------|
-| `FRONTIER_TYPE`         | Define type of controller                   | `view`                    |
-| `FRONTIER_ENDPOINT`     | Endpoint where the frontend will run        | `frontier`                |
-| `FRONTIER_VIEW`         | Default `view` that will be rendered        | `frontier::index`         |
-| `FRONTIER_VIEWS_PATH`   | Directory where all the `views` are         | `frontier/resources/html` |
-| `FRONTIER_FIND`         | Content that will be replaced in the `view` |                           |
-| `FRONTIER_REPLACE_WITH` | Content that will be the replacement        |                           |
+| Variable                | Description                                                 | Default                   |
+|-------------------------|-------------------------------------------------------------|---------------------------|
+| `FRONTIER_TYPE`         | Define type of controller `http` or `view`                  | `view`                    |
+| `FRONTIER_ENDPOINT`     | Endpoint where the frontend will run                        | `frontier`                |
+| `FRONTIER_VIEW`         | Default `view` that will be rendered or `url` of the server | `frontier::index`         |
+| `FRONTIER_VIEWS_PATH`   | Directory where all the `views` are                         | `frontier/resources/html` |
+| `FRONTIER_FIND`         | Content that will be replaced                               |                           |
+| `FRONTIER_REPLACE_WITH` | Content that will be the replacement                        |                           |
+
+### Frontend types
+
+You can use 2 different types of frontend `http` or `view`.
+
+#### HTTP
+
+Use in `FRONTIER_VIEW` the URL of your frontend server, if you use Vite is `http://localhost:5173`. 
+
+#### View
+
+Use in `FRONTIER_VIEW` the name of your view that you initialize your frontend, this is relative a Blade views.
 
 ### Multiple frontends
 
