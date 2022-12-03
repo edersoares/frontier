@@ -8,7 +8,7 @@ use InvalidArgumentException;
 
 class FrontierServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/frontier.php', 'frontier');
 
@@ -25,9 +25,9 @@ class FrontierServiceProvider extends ServiceProvider
         }
     }
 
-    private function frontend($config)
+    private function frontend($config): void
     {
-        return Route::get($config['endpoint'] . '/{uri?}', $this->getControllerFromType($config['type']))
+        Route::get($config['endpoint'] . '/{uri?}', $this->getControllerFromType($config['type']))
             ->middleware($config['middleware'] ?? [])
             ->where('uri', '.*')
             ->setDefaults([
