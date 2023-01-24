@@ -22,6 +22,7 @@ abstract class TestCase extends OrchestraTestCase
                     'type' => 'http',
                     'endpoint' => 'http',
                     'view' => 'http://localhost',
+                    'cache' => false,
                 ],
                 'view' => [
                     'type' => 'view',
