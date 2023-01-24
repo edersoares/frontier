@@ -9,7 +9,7 @@ class FrontendHttpController
     public function __invoke($uri, $config): string
     {
         $endpoint = trim($config['endpoint'], '/');
-        $path = storage_path("frontier/$endpoint.html");
+        $path = storage_path("framework/views/frontier-$endpoint.html");
 
         if (file_exists($path)) {
             return file_get_contents($path);

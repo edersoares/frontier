@@ -26,7 +26,7 @@ class FrontendHttpControllerTest extends TestCase
 
     public function testHttpController(): void
     {
-        $file = storage_path('frontier/http.html');
+        $file = storage_path("framework/views/frontier-http.html");
         $text = 'Frontier by HTTP';
 
         Http::fake([
