@@ -30,7 +30,7 @@
         "test": "Run tests"
     },
     "require": {
-        "illuminate/support": "^8|^9"
+        "illuminate/support": "^8|^9|^10"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
