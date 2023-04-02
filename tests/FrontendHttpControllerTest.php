@@ -6,13 +6,6 @@ use Illuminate\Support\Facades\Http;
 
 class FrontendHttpControllerTest extends TestCase
 {
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        $this->artisan('view:clear');
-    }
-
     public function testHttpController(): void
     {
         $http = storage_path("framework/views/frontier-http.html");
@@ -39,5 +32,8 @@ class FrontendHttpControllerTest extends TestCase
         $this->get('/http-with-cache')
             ->assertStatus(200)
             ->assertSeeText($text);
+
+        // Remove cache
+        $this->artisan('view:clear');
     }
 }
