@@ -30,6 +30,8 @@ return [
             env('FRONTIER_FIND') => env('FRONTIER_REPLACE_WITH'),
         ],
 
+        'cache' => env('FRONTIER_CACHE', true),
+
     ],
 
 ];

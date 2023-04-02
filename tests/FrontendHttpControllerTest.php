@@ -6,27 +6,10 @@ use Illuminate\Support\Facades\Http;
 
 class FrontendHttpControllerTest extends TestCase
 {
-    protected string $storagePath;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->storagePath = storage_path('frontier');
-
-        exec('mkdir -p ' . $this->storagePath);
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        exec('rm -R ' . $this->storagePath);
-    }
-
     public function testHttpController(): void
     {
-        $file = storage_path('frontier/http.html');
+        $http = storage_path("framework/views/frontier-http.html");
+        $httpWithCache = storage_path("framework/views/frontier-http-with-cache.html");
         $text = 'Frontier by HTTP';
 
         Http::fake([
@@ -37,11 +20,20 @@ class FrontendHttpControllerTest extends TestCase
             ->assertStatus(200)
             ->assertSeeText($text);
 
-        $this->assertFileExists($file);
-        $this->assertStringEqualsFile($file, $text);
+        $this->assertFileDoesNotExist($http);
 
-        $this->get('/http')
+        $this->get('/http-with-cache')
             ->assertStatus(200)
             ->assertSeeText($text);
+
+        $this->assertFileExists($httpWithCache);
+        $this->assertStringEqualsFile($httpWithCache, $text);
+
+        $this->get('/http-with-cache')
+            ->assertStatus(200)
+            ->assertSeeText($text);
+
+        // Remove cache
+        $this->artisan('view:clear');
     }
 }

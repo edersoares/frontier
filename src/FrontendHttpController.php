@@ -9,9 +9,9 @@ class FrontendHttpController
     public function __invoke($uri, $config): string
     {
         $endpoint = trim($config['endpoint'], '/');
-        $path = storage_path("frontier/$endpoint.html");
+        $path = storage_path("framework/views/frontier-$endpoint.html");
 
-        if (file_exists($path)) {
+        if ($config['cache'] && file_exists($path)) {
             return file_get_contents($path);
         }
 
@@ -25,7 +25,9 @@ class FrontendHttpController
             $content
         );
 
-        file_put_contents($path, $content);
+        if ($config['cache']) {
+            file_put_contents($path, $content);
+        }
 
         return $content;
     }
