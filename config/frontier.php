@@ -26,9 +26,10 @@ return [
         // https://laravel.com/docs/middleware
         'middleware' => [],
 
-        'replaces' => [
-            env('FRONTIER_FIND') => env('FRONTIER_REPLACE_WITH'),
-        ],
+        'replaces' => array_combine(
+            explode(',', env('FRONTIER_FIND')),
+            explode(',', env('FRONTIER_REPLACE_WITH')),
+        ),
 
         'cache' => env('FRONTIER_CACHE', true),
 
