@@ -33,6 +33,9 @@ return [
 
         'cache' => env('FRONTIER_CACHE', true),
 
+        'headers' => [
+            'Accept' => 'text/html',
+        ],
     ],
 
 ];
