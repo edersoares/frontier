@@ -38,7 +38,7 @@ abstract class TestCase extends OrchestraTestCase
                         'frontier' => __DIR__ . '/../resources/html',
                     ],
                 ],
-            ]
+            ],
         ]);
     }
 }
