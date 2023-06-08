@@ -22,12 +22,12 @@
         }
     },
     "scripts": {
-        "coverage": "vendor/bin/phpunit --coverage-html=.build/code-coverage",
+        "coverage": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",
         "format": "vendor/bin/pint",
-        "test": "vendor/bin/phpunit"
+        "test": "vendor/bin/pest"
     },
     "scripts-descriptions": {
-        "coverage": "Run tests and code coverage",
+        "coverage": "Run code coverage",
         "format": "Format code",
         "test": "Run tests"
     },
