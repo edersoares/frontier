@@ -23,10 +23,12 @@
     },
     "scripts": {
         "coverage": "vendor/bin/phpunit --coverage-html=.build/code-coverage",
+        "format": "vendor/bin/pint",
         "test": "vendor/bin/phpunit"
     },
     "scripts-descriptions": {
         "coverage": "Run tests and code coverage",
+        "format": "Format code",
         "test": "Run tests"
     },
     "require": {
@@ -35,7 +37,8 @@
     "require-dev": {
         "phpunit/phpunit": "^9.5",
         "orchestra/testbench": "^6.23",
-        "guzzlehttp/guzzle": "^7.4"
+        "guzzlehttp/guzzle": "^7.4",
+        "laravel/pint": "^1.10"
     },
     "extra": {
         "laravel": {

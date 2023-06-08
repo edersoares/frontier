@@ -8,8 +8,8 @@ class FrontendHttpControllerTest extends TestCase
 {
     public function testHttpController(): void
     {
-        $http = storage_path("framework/views/frontier-http.html");
-        $httpWithCache = storage_path("framework/views/frontier-http-with-cache.html");
+        $http = storage_path('framework/views/frontier-http.html');
+        $httpWithCache = storage_path('framework/views/frontier-http-with-cache.html');
         $text = 'Frontier by HTTP';
 
         Http::fake([
