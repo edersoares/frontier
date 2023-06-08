@@ -35,7 +35,7 @@
         "illuminate/support": "^8|^9|^10"
     },
     "require-dev": {
-        "orchestra/testbench": "^6.23",
+        "orchestra/testbench": "^8.5",
         "guzzlehttp/guzzle": "^7.4",
         "laravel/pint": "^1.10"
     },
