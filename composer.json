@@ -32,11 +32,13 @@
         "test": "Run tests"
     },
     "require": {
-        "illuminate/support": "^8|^9|^10"
+        "guzzlehttp/guzzle": "^7",
+        "illuminate/http": "^8|^9|^10",
+        "illuminate/support": "^8|^9|^10",
+        "illuminate/view": "^8|^9|^10"
     },
     "require-dev": {
         "orchestra/testbench": "^8.5",
-        "guzzlehttp/guzzle": "^7.4",
         "laravel/pint": "^1.10",
         "pestphp/pest": "^2.6"
     },
