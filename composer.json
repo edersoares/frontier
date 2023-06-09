@@ -11,6 +11,17 @@
             "role": "Developer"
         }
     ],
+    "require": {
+        "guzzlehttp/guzzle": "^7",
+        "illuminate/http": "^8|^9|^10",
+        "illuminate/support": "^8|^9|^10",
+        "illuminate/view": "^8|^9|^10"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.10",
+        "orchestra/testbench": "^8.5",
+        "pestphp/pest": "^2.6"
+    },
     "autoload": {
         "psr-4": {
             "Dex\\Laravel\\Frontier\\": "src/"
@@ -20,27 +31,6 @@
         "psr-4": {
             "Dex\\Laravel\\Frontier\\Tests\\": "tests/"
         }
-    },
-    "scripts": {
-        "coverage": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",
-        "format": "vendor/bin/pint",
-        "test": "vendor/bin/pest"
-    },
-    "scripts-descriptions": {
-        "coverage": "Run code coverage",
-        "format": "Format code",
-        "test": "Run tests"
-    },
-    "require": {
-        "guzzlehttp/guzzle": "^7",
-        "illuminate/http": "^8|^9|^10",
-        "illuminate/support": "^8|^9|^10",
-        "illuminate/view": "^8|^9|^10"
-    },
-    "require-dev": {
-        "orchestra/testbench": "^8.5",
-        "laravel/pint": "^1.10",
-        "pestphp/pest": "^2.6"
     },
     "extra": {
         "laravel": {
@@ -52,6 +42,17 @@
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true
-        }
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "coverage": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint",
+        "test": "vendor/bin/pest"
+    },
+    "scripts-descriptions": {
+        "coverage": "Run code coverage",
+        "format": "Format code",
+        "test": "Run tests"
     }
 }
