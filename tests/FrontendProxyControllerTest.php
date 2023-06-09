@@ -11,7 +11,7 @@ class FrontendProxyControllerTest extends TestCase
         $text = 'Frontier by Proxy';
 
         Http::fake([
-            'localhost/proxy-uri' => Http::response($text),
+            'frontier.test/proxy-uri' => Http::response($text),
         ]);
 
         $this->get('/proxy-uri')

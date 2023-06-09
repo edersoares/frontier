@@ -26,24 +26,47 @@ You can configure your frontend using some environment variables described below
 
 | Variable                | Description                                                 | Default                   |
 |-------------------------|-------------------------------------------------------------|---------------------------|
-| `FRONTIER_TYPE`         | Define type of controller `http` or `view`                  | `view`                    |
+| `FRONTIER_TYPE`         | Define type of controller `http`, `proxy` or `view`         | `view`                    |
 | `FRONTIER_ENDPOINT`     | Endpoint where the frontend will run                        | `frontier`                |
 | `FRONTIER_VIEW`         | Default `view` that will be rendered or `url` of the server | `frontier::index`         |
 | `FRONTIER_VIEWS_PATH`   | Directory where all the `views` are                         | `frontier/resources/html` |
 | `FRONTIER_FIND`         | Content that will be replaced                               |                           |
 | `FRONTIER_REPLACE_WITH` | Content that will be the replacement                        |                           |
+| `FRONTIER_PROXY`        | URIs that you will do proxy                                 |                           |
+| `FRONTIER_CACHE`        | When `http` type, indicates se cache will be do             | `true`                    |
 
 ### Frontend types
 
-You can use 2 different types of frontend `http` or `view`.
+You can use 3 different types of frontend `http`, `proxy` or `view`.
 
 #### HTTP
 
-Use in `FRONTIER_VIEW` the URL of your frontend server, if you use Vite is `http://localhost:5173`. 
+Use in `FRONTIER_VIEW` the URL of your frontend server.
+
+#### Proxy
+
+Use in `FRONTIER_VIEW` the URL of your real server.
 
 #### View
 
 Use in `FRONTIER_VIEW` the name of your view that you initialize your frontend, this is relative a Blade views.
+
+### Examples
+
+#### Vite and Vue.js
+
+When using [Vite](https://vitejs.dev/) and [Vue.js](https://vuejs.org/) you can start your project with these
+environment variables.
+
+```bash
+FRONTIER_ENDPOINT=/vue
+FRONTIER_TYPE=http
+FRONTIER_VIEW=http://localhost:5173/
+FRONTIER_FIND=/@vite/client,/src/main.ts,/vite.svg
+FRONTIER_REPLACE_WITH=http://localhost:5173/@vite/client,http://localhost:5173/src/main.ts,http://localhost:5173/vite.svg
+FRONTIER_PROXY=/vite.svg
+FRONTIER_CACHE=false
+```
 
 ### Multiple frontends
 
@@ -53,7 +76,7 @@ You can run multiple frontends, just create a custom configuration file.
 php artisan vendor:publish --tag=frontier
 ```
 
-The `config/frontier.php` file will be created in your Laravel app. This file contains some settings that can be 
+The `config/frontier.php` file will be created in your Laravel app. This file contains some settings that can be
 replicated to add more frontends to your app.
 
 ## License
