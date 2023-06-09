@@ -31,6 +31,8 @@ return [
             explode(',', env('FRONTIER_REPLACE_WITH')),
         ),
 
+        'proxy' => explode(',', env('FRONTIER_PROXY')),
+
         'cache' => env('FRONTIER_CACHE', true),
 
         'headers' => [

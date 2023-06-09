@@ -34,12 +34,21 @@ class FrontierServiceProvider extends ServiceProvider
                 'uri' => '',
                 'config' => $config,
             ]);
+
+        foreach ($config['proxy'] ?? [] as $uri) {
+            Route::get($uri, $this->getControllerFromType('proxy'))
+                ->setDefaults([
+                    'uri' => $uri,
+                    'config' => $config,
+                ]);
+        }
     }
 
     private function getControllerFromType(string $type): string
     {
         return match ($type) {
             'http' => FrontendHttpController::class,
+            'proxy' => FrontendProxyController::class,
             'view' => FrontendViewController::class,
             default => throw new InvalidArgumentException('Unknown controller type'),
         };
