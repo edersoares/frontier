@@ -13,7 +13,7 @@ class FrontendHttpControllerTest extends TestCase
         $text = 'Frontier by HTTP';
 
         Http::fake([
-            'localhost' => Http::response($text),
+            'frontier.test' => Http::response($text),
         ]);
 
         $this->get('/http')
