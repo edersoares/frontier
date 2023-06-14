@@ -31,7 +31,7 @@ return [
             explode(',', env('FRONTIER_REPLACE_WITH')),
         ),
 
-        'proxy' => explode(',', env('FRONTIER_PROXY')),
+        'proxy' => array_filter(explode(',', env('FRONTIER_PROXY'))),
 
         'cache' => env('FRONTIER_CACHE', true),
 
