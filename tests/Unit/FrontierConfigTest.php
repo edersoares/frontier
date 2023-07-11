@@ -5,7 +5,7 @@ use Dex\Laravel\Frontier\FrontierConfig;
 
 beforeEach(fn () => Frontier::reset());
 
-test('`Frontier::push` simple use', function () {
+test('`Frontier` simple use', function () {
     $frontier = Frontier::instance();
 
     $frontier->push(new FrontierConfig('ui', 'view', '/web', 'index'));
@@ -21,7 +21,7 @@ test('`Frontier::push` simple use', function () {
     ]);
 });
 
-test('`Frontier::http` using all methods', function () {
+test('`Frontier` using all methods', function () {
     $frontier = Frontier::instance();
 
     $config = new FrontierConfig('ui', 'view', '/web', 'index');
