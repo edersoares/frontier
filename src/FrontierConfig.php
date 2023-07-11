@@ -16,10 +16,6 @@ class FrontierConfig
 
     protected array $replaces = [];
 
-    protected array $proxy = [];
-
-    protected bool $cache = true;
-
     public function __construct(string $name, string $type, string $endpoint, string $view)
     {
         $this->name = $name;

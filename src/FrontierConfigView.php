@@ -5,6 +5,7 @@ namespace Dex\Laravel\Frontier;
 class FrontierConfigView extends FrontierConfig
 {
     protected array $views = [];
+
     protected array $publishes = [];
 
     public function __construct(string $name, string $endpoint, string $view)

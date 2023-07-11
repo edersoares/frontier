@@ -4,6 +4,10 @@ namespace Dex\Laravel\Frontier;
 
 class FrontierConfigHttp extends FrontierConfig
 {
+    protected array $proxy = [];
+
+    protected bool $cache = true;
+
     public function __construct(string $name, string $endpoint, string $url)
     {
         parent::__construct($name, 'http', $endpoint, $url);
