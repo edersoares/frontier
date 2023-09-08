@@ -94,3 +94,23 @@ test('`Frontier::http` using `noCache` method', function () {
         ],
     ]);
 });
+
+test('`Frontier::http` using `headers` method', function () {
+    $config = Frontier::http('web', '/web', 'http://localhost')
+        ->header('Accept', 'text/html');
+
+    expect($config->config())->toEqual([
+        'web' => [
+            'type' => 'http',
+            'endpoint' => '/web',
+            'view' => 'http://localhost',
+            'middleware' => [],
+            'replaces' => [],
+            'proxy' => [],
+            'cache' => true,
+            'headers' => [
+                'Accept' => 'text/html',
+            ],
+        ],
+    ]);
+});

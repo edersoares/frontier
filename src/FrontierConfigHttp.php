@@ -6,6 +6,8 @@ class FrontierConfigHttp extends FrontierConfig
 {
     protected array $proxy = [];
 
+    protected array $headers = [];
+
     protected bool $cache = true;
 
     public function __construct(string $name, string $endpoint, string $url)
@@ -23,6 +25,13 @@ class FrontierConfigHttp extends FrontierConfig
     public function noCache(): static
     {
         $this->cache = false;
+
+        return $this;
+    }
+
+    public function header(string $header, string $value): static
+    {
+        $this->headers[$header] = $value;
 
         return $this;
     }
@@ -45,7 +54,7 @@ class FrontierConfigHttp extends FrontierConfig
             $this->name => [
                 'proxy' => $this->proxy,
                 'cache' => $this->cache,
-                'headers' => [],
+                'headers' => $this->headers,
             ],
         ]);
     }
