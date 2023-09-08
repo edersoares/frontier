@@ -13,14 +13,37 @@ backend. You will be able to test your app using cookies, sessions and avoiding 
 
 ## Installation
 
-Just install `dex/frontier` into your Laravel app and configure some
-[environment variables](https://github.com/edersoares/frontier#environment-variables).
+Just install `dex/frontier` into your Laravel app and do some configurations.
 
 ```bash 
 composer require dex/frontier
 ```
 
-### Environment variables
+## Frontend types
+
+You can use 3 different types of frontend `http`, `proxy` or `view`.
+
+### HTTP
+
+This type will make HTTP request to your frontend server to gets your content, replace data and return to the client.
+
+Use in `FRONTIER_VIEW` environment variable the URL of your frontend server.
+
+### Proxy
+
+This type will make HTTP request to your frontend server to gets your content and return to the client without replace 
+data. This is a good approach to static files.
+
+Use in `FRONTIER_VIEW` environment variable the URL of your real server.
+
+### View
+
+This type will use Blade views in your application to gets your rendered content, replace data and return to the client.
+
+Use in `FRONTIER_VIEW` environment variable the name of your view that will initialize your frontend, this is relative a 
+Blade views.
+
+## Environment variables
 
 You can configure your frontend using some environment variables described below.
 
@@ -35,31 +58,51 @@ You can configure your frontend using some environment variables described below
 | `FRONTIER_PROXY`        | URIs that you will do proxy                                 |                           |
 | `FRONTIER_CACHE`        | When `http` type, indicates se cache will be do             | `true`                    |
 
-### Frontend types
+## Examples
 
-You can use 3 different types of frontend `http`, `proxy` or `view`.
+### Using Nuxt
 
-#### HTTP
+When using [Nuxt](https://nuxt.com/) you can start your project adding in your `AppServiceProvider`:
 
-Use in `FRONTIER_VIEW` the URL of your frontend server.
+```php 
+public function boot(): void
+{
+    Frontier::http('nuxt', '/ui', 'http://localhost:3000')
+        ->cacheInProduction()
+        ->replaceAsProxy('/_nuxt/');
+}
+```
 
-#### Proxy
-
-Use in `FRONTIER_VIEW` the URL of your real server.
-
-#### View
-
-Use in `FRONTIER_VIEW` the name of your view that you initialize your frontend, this is relative a Blade views.
-
-### Examples
-
-#### Vite and Vue.js
-
-When using [Vite](https://vitejs.dev/) and [Vue.js](https://vuejs.org/) you can start your project with these
-environment variables.
+or using environment variables:
 
 ```bash
-FRONTIER_ENDPOINT=/vue
+FRONTIER_ENDPOINT=/ui
+FRONTIER_TYPE=http
+FRONTIER_VIEW=http://localhost:3000/
+FRONTIER_FIND=/_nuxt/
+FRONTIER_REPLACE_WITH=http://localhost:3000/_nuxt/
+FRONTIER_CACHE=false
+```
+
+### Using Vite and Vue.js
+
+When using [Vite](https://vitejs.dev/) and [Vue.js](https://vuejs.org/) you can start your project adding in your `AppServiceProvider`:
+
+```php 
+public function boot(): void
+{
+    Frontier::http('ui', '/ui', 'http://localhost:5173')
+        ->cacheInProduction()
+        ->replaceAsProxy('/@vite/client')
+        ->replaceAsProxy('/vite.svg')
+        ->replaceAsProxy('/src/main.ts');
+}
+```
+
+or using environment variables:
+
+```bash
+FRONTIER_ENDPOINT=/ui
 FRONTIER_TYPE=http
 FRONTIER_VIEW=http://localhost:5173/
 FRONTIER_FIND=/@vite/client,/src/main.ts,/vite.svg
