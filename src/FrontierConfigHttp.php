@@ -22,6 +22,13 @@ class FrontierConfigHttp extends FrontierConfig
         return $this;
     }
 
+    public function cacheInProduction(): static
+    {
+        $this->cache = app()->isProduction();
+
+        return $this;
+    }
+
     public function noCache(): static
     {
         $this->cache = false;

@@ -77,6 +77,24 @@ test('`Frontier::http` using `cache` method', function () {
     ]);
 });
 
+test('`Frontier::http` using `cacheInProduction` method', function () {
+    $config = Frontier::http('web', '/web', 'http://localhost')
+        ->cacheInProduction();
+
+    expect($config->config())->toEqual([
+        'web' => [
+            'type' => 'http',
+            'endpoint' => '/web',
+            'view' => 'http://localhost',
+            'middleware' => [],
+            'replaces' => [],
+            'proxy' => [],
+            'cache' => false,
+            'headers' => [],
+        ],
+    ]);
+});
+
 test('`Frontier::http` using `noCache` method', function () {
     $config = Frontier::http('web', '/web', 'http://localhost')
         ->noCache();
