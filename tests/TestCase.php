@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dex\Laravel\Frontier\Tests;
 
 use Dex\Laravel\Frontier\FrontierServiceProvider;
@@ -24,7 +26,7 @@ abstract class TestCase extends OrchestraTestCase
                     'view' => 'http://frontier.test',
                     'cache' => false,
                     'proxy' => [
-                        'proxy-uri'
+                        'proxy-uri',
                     ],
                 ],
                 'http-with-cache' => [

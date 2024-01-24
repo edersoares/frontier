@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dex\Laravel\Frontier\Tests;
 
 use Illuminate\Support\Facades\Http;
