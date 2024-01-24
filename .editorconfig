@@ -3,12 +3,16 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
-insert_final_newline = true
-indent_style = space
 indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
 
-[*.{css, js, json, xml}]
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{css,js,json,ts,vue,xml,xml.dist,yml,yaml}]
 indent_size = 2
 
-[{composer.json, composer-plug-and-play.json}]
+[{composer.json,plug-and-play.json}]
 indent_size = 4
