@@ -29,7 +29,10 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Dex\\Laravel\\Frontier\\Tests\\": "tests/"
+            "Dex\\Laravel\\Frontier\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
         }
     },
     "extra": {
@@ -47,12 +50,25 @@
     },
     "scripts": {
         "coverage": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",
-        "format": "vendor/bin/pint",
-        "test": "vendor/bin/pest"
+        "test": "vendor/bin/pest",
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve"
+        ],
+        "lint": [
+            "@php vendor/bin/pint"
+        ]
     },
     "scripts-descriptions": {
         "coverage": "Run code coverage",
-        "format": "Format code",
         "test": "Run tests"
     }
 }
