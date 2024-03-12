@@ -29,11 +29,11 @@ return [
         'middleware' => [],
 
         'replaces' => array_combine(
-            array_filter(explode(',', env('FRONTIER_FIND'))),
-            array_filter(explode(',', env('FRONTIER_REPLACE_WITH'))),
+            array_filter(explode(',', env('FRONTIER_FIND', ''))),
+            array_filter(explode(',', env('FRONTIER_REPLACE_WITH', ''))),
         ),
 
-        'proxy' => array_filter(explode(',', env('FRONTIER_PROXY'))),
+        'proxy' => array_filter(explode(',', env('FRONTIER_PROXY', ''))),
 
         'cache' => env('FRONTIER_CACHE', true),
 
