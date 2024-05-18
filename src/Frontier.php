@@ -24,7 +24,7 @@ class Frontier
 
     public function config(): array
     {
-        $config = [];
+        $config = config('frontier');
 
         foreach ($this->config as $item) {
             $config = array_merge($config, $item->config());
