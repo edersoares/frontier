@@ -35,6 +35,8 @@ return [
 
         'proxy' => array_filter(explode(',', env('FRONTIER_PROXY', ''))),
 
+        'proxy-url' => env('FRONTIER_PROXY_URL', ''),
+
         'cache' => env('FRONTIER_CACHE', true),
 
         'headers' => [

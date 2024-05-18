@@ -12,32 +12,37 @@ class FrontierServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/frontier.php', 'frontier');
+        foreach (config('frontier') as $config) {
+            $this->frontend($config);
+
+            foreach ($config['views'] ?? [] as $namespace => $path) {
+                $this->loadViewsFrom($path, $namespace);
+            }
+
+            foreach ($config['publishes'] ?? [] as $groups => $paths) {
+                $this->publishes($paths, $groups);
+            }
+        }
     }
 
     public function register(): void
     {
-        $this->app->booted(function () {
-            config([
-                'frontier' => array_merge(config('frontier'), Frontier::instance()->config()),
-            ]);
-
-            foreach (config('frontier') as $config) {
-                $this->frontend($config);
-
-                foreach ($config['views'] ?? [] as $namespace => $path) {
-                    $this->loadViewsFrom($path, $namespace);
-                }
-
-                foreach ($config['publishes'] ?? [] as $groups => $paths) {
-                    $this->publishes($paths, $groups);
-                }
-            }
-        });
+        $this->mergeConfigFrom(__DIR__ . '/../config/frontier.php', 'frontier');
     }
 
     private function frontend($config): void
     {
+        foreach ($config['proxy'] ?? [] as $uri) {
+            Route::get($uri . '{uri?}', $this->getControllerFromType('proxy'))
+                ->where('uri', '.*')
+                ->setDefaults([
+                    'uri' => '',
+                    'config' => [
+                        'view' => $config['proxy-url'] . $uri,
+                    ],
+                ]);
+        }
+
         Route::get($config['endpoint'] . '/{uri?}', $this->getControllerFromType($config['type']))
             ->middleware($config['middleware'] ?? [])
             ->where('uri', '.*')
@@ -45,14 +50,6 @@ class FrontierServiceProvider extends ServiceProvider
                 'uri' => '',
                 'config' => $config,
             ]);
-
-        foreach ($config['proxy'] ?? [] as $uri) {
-            Route::get($uri, $this->getControllerFromType('proxy'))
-                ->setDefaults([
-                    'uri' => $uri,
-                    'config' => $config,
-                ]);
-        }
     }
 
     private function getControllerFromType(string $type): string
