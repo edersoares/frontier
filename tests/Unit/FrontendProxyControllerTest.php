@@ -6,10 +6,10 @@ test('flow using `FrontendProxyController`', function () {
     $text = 'Frontier by Proxy';
 
     Http::fake([
-        'frontier.test/proxy-uri' => Http::response($text),
+        'frontier.test/proxy-uri/' => Http::response($text),
     ]);
 
-    $this->get('/proxy-uri')
+    $this->get('/proxy-uri/')
         ->assertStatus(200)
         ->assertSeeText($text);
 });

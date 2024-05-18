@@ -38,7 +38,16 @@ class FrontierServiceProvider extends ServiceProvider
                 ->setDefaults([
                     'uri' => '',
                     'config' => [
-                        'view' => $config['proxy-url'] . $uri,
+                        'view' => ($config['proxy-url'] ?? $config['view']) . $uri,
+                    ],
+                ]);
+
+            Route::get($uri, $this->getControllerFromType('proxy'))
+                ->where('uri', '.*')
+                ->setDefaults([
+                    'uri' => '',
+                    'config' => [
+                        'view' => ($config['proxy-url'] ?? $config['view']),
                     ],
                 ]);
         }

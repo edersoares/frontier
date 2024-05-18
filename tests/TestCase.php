@@ -28,6 +28,7 @@ abstract class TestCase extends OrchestraTestCase
                     'proxy' => [
                         'proxy-uri',
                     ],
+                    'proxy-url' => 'http://frontier.test/',
                 ],
                 'http-with-cache' => [
                     'type' => 'http',
