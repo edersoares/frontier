@@ -25,6 +25,6 @@ class FrontierServiceProvider extends ServiceProvider
             }
         }
 
-        Frontier::addFromConfig('frontier.frontier');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/frontier.php');
     }
 }
