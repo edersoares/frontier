@@ -7,50 +7,46 @@ namespace Dex\Laravel\Frontier\Tests;
 use Dex\Laravel\Frontier\Frontier;
 use Illuminate\Support\Facades\Http;
 
-class FrontendHttpControllerTest extends TestCase
-{
-    public function testHttpController(): void
-    {
-        Frontier::add([
-            'type' => 'http',
-            'endpoint' => 'http',
-            'view' => 'http://frontier.test',
-            'cache' => false,
-        ]);
+test('`http` controller', function () {
+    Frontier::add([
+        'type' => 'http',
+        'endpoint' => 'http',
+        'view' => 'http://frontier.test',
+        'cache' => false,
+    ]);
 
-        Frontier::add([
-            'type' => 'http',
-            'endpoint' => 'http-with-cache',
-            'view' => 'http://frontier.test',
-            'cache' => true,
-        ]);
+    Frontier::add([
+        'type' => 'http',
+        'endpoint' => 'http-with-cache',
+        'view' => 'http://frontier.test',
+        'cache' => true,
+    ]);
 
-        $http = storage_path('framework/views/frontier-http.html');
-        $httpWithCache = storage_path('framework/views/frontier-http-with-cache.html');
-        $text = 'Frontier by HTTP';
+    $http = storage_path('framework/views/frontier-http.html');
+    $httpWithCache = storage_path('framework/views/frontier-http-with-cache.html');
+    $text = 'Frontier by HTTP';
 
-        Http::fake([
-            'frontier.test' => Http::response($text),
-        ]);
+    Http::fake([
+        'frontier.test' => Http::response($text),
+    ]);
 
-        $this->get('/http')
-            ->assertStatus(200)
-            ->assertSeeText($text);
+    $this->get('/http')
+        ->assertStatus(200)
+        ->assertSeeText($text);
 
-        $this->assertFileDoesNotExist($http);
+    $this->assertFileDoesNotExist($http);
 
-        $this->get('/http-with-cache')
-            ->assertStatus(200)
-            ->assertSeeText($text);
+    $this->get('/http-with-cache')
+        ->assertStatus(200)
+        ->assertSeeText($text);
 
-        $this->assertFileExists($httpWithCache);
-        $this->assertStringEqualsFile($httpWithCache, $text);
+    $this->assertFileExists($httpWithCache);
+    $this->assertStringEqualsFile($httpWithCache, $text);
 
-        $this->get('/http-with-cache')
-            ->assertStatus(200)
-            ->assertSeeText($text);
+    $this->get('/http-with-cache')
+        ->assertStatus(200)
+        ->assertSeeText($text);
 
-        // Remove cache
-        $this->artisan('view:clear');
-    }
-}
+    // Remove cache
+    $this->artisan('view:clear');
+});
