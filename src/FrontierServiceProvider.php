@@ -10,10 +10,13 @@ use InvalidArgumentException;
 
 class FrontierServiceProvider extends ServiceProvider
 {
-    public function boot(): void
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/frontier.php', 'frontier');
+    }
 
+    public function boot(): void
+    {
         foreach ($this->app['config']->get('frontier') as $config) {
             $this->frontend($config);
 
