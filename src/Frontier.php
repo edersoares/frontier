@@ -13,6 +13,7 @@ class Frontier
     {
         match ($config['type']) {
             'http' => self::http($config),
+            'proxy' => self::proxy($config),
             'view' => self::view($config),
         };
     }
@@ -25,6 +26,56 @@ class Frontier
     private static function http(array $config): void
     {
         self::frontend($config);
+    }
+
+    private static function proxy(array $config): void
+    {
+        $host = $config['host'] ?? '';
+        $rules = $config['rules'] ?? [];
+
+        foreach ($rules as $rule) {
+            $segments = explode(':', $rule);
+
+            $url = $host;
+            $uri = $segments[0];
+            $replaces = [];
+            $proxyAll = true;
+
+            foreach ($segments as $segment) {
+                if ($segment === 'exact') {
+                    $proxyAll = false;
+                }
+
+                if (str_starts_with($segment, 'replace(') && str_ends_with($segment, ')')) {
+                    $replace = substr($segment, 8, -1);
+
+                    [$search, $replace] = explode(',', $replace . ',');
+
+                    if (empty($replace)) {
+                        $replace = $url . $search;
+                    }
+
+                    $replaces[$search] = $replace;
+                }
+            }
+
+            if ($proxyAll) {
+                $url = $url . $uri;
+                $uri .= '/{uri?}';
+            }
+
+            $uri = str_replace('//', '/', $uri);
+
+            Route::get($uri, FrontendProxyController::class)
+                ->where('uri', '.*')
+                ->setDefaults([
+                    'uri' => $uri,
+                    'config' => [
+                        'url' => $url,
+                        'replaces' => $replaces,
+                    ],
+                ]);
+        }
     }
 
     private static function view(array $config): void
