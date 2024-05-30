@@ -46,7 +46,7 @@ return [
 
         'host' => env('FRONTIER_PROXY_HOST', ''),
 
-        'rules' => array_filter(explode(',', env('FRONTIER_PROXY_RULES', ''))),
+        'rules' => array_filter(explode('|', env('FRONTIER_PROXY_RULES', ''))),
 
     ],
 

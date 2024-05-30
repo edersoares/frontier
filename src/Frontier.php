@@ -34,7 +34,7 @@ class Frontier
         $rules = $config['rules'] ?? [];
 
         foreach ($rules as $rule) {
-            $segments = explode(':', $rule);
+            $segments = explode('::', $rule);
 
             $url = $host;
             $uri = $segments[0];

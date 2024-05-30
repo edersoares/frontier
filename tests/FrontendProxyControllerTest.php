@@ -11,9 +11,9 @@ beforeEach(fn () => Frontier::add([
     'type' => 'proxy',
     'host' => 'frontier.test',
     'rules' => [
-        '/favicon.ico:exact',
-        '/exact/replace:exact:replace(/exact/replace)',
-        '/all:replace(Replace,is amazing!)',
+        '/favicon.ico::exact',
+        '/exact/replace::exact::replace(/exact/replace,https://frontier.test/another/exact/replace)',
+        '/all::replace(Replace,is amazing!)',
         '/web',
     ],
 ]));
@@ -55,7 +55,7 @@ test('proxy exact and replace', function () {
     ]);
 
     $this->get('/exact/replace')
-        ->assertContent('Running: frontier.test/exact/replace')
+        ->assertContent('Running: https://frontier.test/another/exact/replace')
         ->assertOk();
 
     $this->get('exact/replace/more')
