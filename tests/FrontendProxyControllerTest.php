@@ -13,6 +13,7 @@ beforeEach(fn () => Frontier::add([
     'rules' => [
         '/favicon.ico::exact',
         '/exact/replace::exact::replace(/exact/replace,https://frontier.test/another/exact/replace)',
+        '/replace::replace(/replace)',
         '/all::replace(Replace,is amazing!)',
         '/web',
     ],
@@ -77,5 +78,15 @@ test('proxy all routes and replace', function () {
 
     $this->get('all/two')
         ->assertContent('Frontier is amazing!')
+        ->assertOk();
+});
+
+test('proxy and replace using base URL', function () {
+    Http::fake([
+        'frontier.test/replace/*' => Http::response('Frontier is running in: /replace'),
+    ]);
+
+    $this->get('/replace')
+        ->assertContent('Frontier is running in: frontier.test/replace')
         ->assertOk();
 });
