@@ -34,6 +34,8 @@ You can configure your frontend using some environment variables described below
 | `FRONTIER_REPLACE_WITH` | Content that will be the replacement                        |                           |
 | `FRONTIER_PROXY`        | URIs that you will do proxy                                 |                           |
 | `FRONTIER_CACHE`        | When `http` type, indicates se cache will be do             | `true`                    |
+| `FRONTIER_PROXY_HOST`   | `url` of the assets server                                  |                           |
+| `FRONTIER_PROXY_RULES`  | Proxy rules                                                 |                           |
 
 ### Frontend types
 
@@ -45,7 +47,9 @@ Use in `FRONTIER_VIEW` the URL of your frontend server.
 
 #### Proxy
 
-Use in `FRONTIER_VIEW` the URL of your real server.
+Use in `FRONTIER_PROXY_HOST` or `FRONTIER_VIEW` the URL of your frontend server.
+
+> `FRONTIER_VIEW` will be removed in the future.
 
 #### View
 
@@ -56,7 +60,7 @@ Use in `FRONTIER_VIEW` the name of your view that you initialize your frontend, 
 #### Vite and Vue.js
 
 When using [Vite](https://vitejs.dev/) and [Vue.js](https://vuejs.org/) you can start your project with these
-environment variables.
+environment variables using `http` approach.
 
 ```bash
 FRONTIER_ENDPOINT=/vue
@@ -66,6 +70,15 @@ FRONTIER_FIND=/@vite/client,/src/main.ts,/vite.svg
 FRONTIER_REPLACE_WITH=http://localhost:5173/@vite/client,http://localhost:5173/src/main.ts,http://localhost:5173/vite.svg
 FRONTIER_PROXY=/vite.svg
 FRONTIER_CACHE=false
+```
+
+#### Nuxt.js
+
+When using [Nuxt](https://nuxt.com/) you can start your project with these environment variables using `proxy` approach.
+
+```bash
+FRONTIER_PROXY_HOST=http://localhost:3000
+FRONTIER_PROXY_RULES=/_vfs.json::exact|/favicon.ico::exact::rewrite(/favicon.ico)|/__nuxt_devtools__/client/_nuxt/builds/meta|/__nuxt_devtools__/client::replace(/__nuxt_devtools__/client/_nuxt/)|/_nuxt|/_fonts|/::replace(/_nuxt/)
 ```
 
 ### Multiple frontends
