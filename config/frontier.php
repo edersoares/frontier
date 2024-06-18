@@ -49,7 +49,7 @@ return [
 
         'type' => 'proxy',
 
-        'host' => env('FRONTIER_PROXY_HOST', ''),
+        'host' => env('FRONTIER_PROXY_HOST', env('FRONTIER_VIEW', '')),
 
         'rules' => array_filter(explode('|', env('FRONTIER_PROXY_RULES', ''))),
 
