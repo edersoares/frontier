@@ -38,6 +38,11 @@ return [
         'headers' => [
             'Accept' => 'text/html',
         ],
+
+        'host' => env('FRONTIER_PROXY_HOST', ''),
+
+        'rules' => array_filter(explode('|', env('FRONTIER_PROXY_RULES', ''))),
+
     ],
 
     'proxy' => [
