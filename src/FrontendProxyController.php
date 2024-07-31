@@ -19,6 +19,14 @@ class FrontendProxyController
         $accept = $this->request->header('accept', '*/*');
         $url = trim($config['url'], '/') . '/' . trim($uri, '/');
 
+        if ($config['rewrite']) {
+            $url = str_replace(
+                array_keys($config['rewrite']),
+                array_values($config['rewrite']),
+                $url
+            );
+        }
+
         $response = Http::withHeaders([
             'Accept' => $accept,
         ])->get($url);

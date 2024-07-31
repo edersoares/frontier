@@ -14,6 +14,7 @@ beforeEach(fn () => Frontier::add([
         '/favicon.ico::exact',
         '/exact/replace::exact::replace(/exact/replace,https://frontier.test/another/exact/replace)',
         '/replace::replace(/replace)',
+        '/rewrite::rewrite(/rewrite,/url-rewrite)',
         '/all::replace(Replace,is amazing!)',
         '/web',
     ],
@@ -88,5 +89,15 @@ test('proxy and replace using base URL', function () {
 
     $this->get('/replace')
         ->assertContent('Frontier is running in: frontier.test/replace')
+        ->assertOk();
+});
+
+test('proxy all routes and rewrite', function () {
+    Http::fake([
+        'frontier.test/url-rewrite/*' => Http::response('Frontier Rewrite URL'),
+    ]);
+
+    $this->get('/rewrite')
+        ->assertContent('Frontier Rewrite URL')
         ->assertOk();
 });
