@@ -43,6 +43,7 @@ class Frontier
             $url = $host;
             $uri = $segments[0];
             $replaces = [];
+            $rewrite = [];
             $proxyAll = true;
 
             foreach ($segments as $segment) {
@@ -61,6 +62,14 @@ class Frontier
 
                     $replaces[$search] = $replace;
                 }
+
+                if (str_starts_with($segment, 'rewrite(') && str_ends_with($segment, ')')) {
+                    $replace = substr($segment, 8, -1);
+
+                    [$search, $replace] = explode(',', $replace . ',');
+
+                    $rewrite[$search] = $replace;
+                }
             }
 
             if ($proxyAll) {
@@ -77,6 +86,7 @@ class Frontier
                     'config' => [
                         'url' => $url,
                         'replaces' => $replaces,
+                        'rewrite' => $rewrite,
                     ],
                 ]);
         }
