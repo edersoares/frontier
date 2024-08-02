@@ -8,6 +8,7 @@ use Dex\Laravel\Frontier\Frontier;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(fn () => Frontier::add([
+    'enabled' => true,
     'type' => 'proxy',
     'host' => 'frontier.test',
     'rules' => [

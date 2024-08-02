@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 
 test('`http` controller', function () {
     Frontier::add([
+        'enabled' => true,
         'type' => 'http',
         'endpoint' => 'http',
         'view' => 'http://frontier.test',
@@ -16,6 +17,7 @@ test('`http` controller', function () {
     ]);
 
     Frontier::add([
+        'enabled' => true,
         'type' => 'http',
         'endpoint' => 'http-with-cache',
         'view' => 'http://frontier.test',

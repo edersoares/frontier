@@ -8,6 +8,7 @@ use Dex\Laravel\Frontier\Frontier;
 
 test('`view` controller', function () {
     Frontier::add([
+        'enabled' => true,
         'type' => 'view',
         'endpoint' => 'view',
         'view' => 'frontier::index',
