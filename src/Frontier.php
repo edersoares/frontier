@@ -11,6 +11,10 @@ class Frontier
 {
     public static function add(array $config): void
     {
+        if (empty($config['enabled'])) {
+            return;
+        }
+
         match ($config['type']) {
             'http' => self::http($config),
             'proxy' => self::proxy($config),
