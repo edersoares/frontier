@@ -6,6 +6,8 @@ return [
 
     'frontier' => [
 
+        'enabled' => env('FRONTIER_DEFAULT_ENABLED', true),
+
         'type' => env('FRONTIER_TYPE', 'view'),
 
         'endpoint' => env('FRONTIER_ENDPOINT', 'frontier'),
@@ -46,6 +48,8 @@ return [
     ],
 
     'proxy' => [
+
+        'enabled' => env('FRONTIER_PROXY_ENABLED', true),
 
         'type' => 'proxy',
 
