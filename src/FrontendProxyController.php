@@ -27,9 +27,18 @@ class FrontendProxyController
             );
         }
 
-        $response = Http::withHeaders([
+        $http = Http::withHeaders([
             'Accept' => $accept,
-        ])->get($url);
+        ]);
+
+        $response = match ($this->request->getMethod()) {
+            'GET' => $http->get($url),
+            'HEAD' => $http->head($url),
+            'POST' => $http->post($url, $this->request->all()),
+            'PATCH' => $http->patch($url, $this->request->all()),
+            'PUT' => $http->put($url, $this->request->all()),
+            'DELETE' => $http->delete($url, $this->request->all()),
+        };
 
         $content = $response->body();
         $contextType = $response->header('content-type');
