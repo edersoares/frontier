@@ -20,6 +20,7 @@ beforeEach(fn () => Frontier::add([
         '/all::replace(Replace,is amazing!)',
         '/web',
         '/all-methods::methods(get,head,options,post,put,patch,delete)',
+        '/with-cache::cache',
     ],
 ]));
 
@@ -162,4 +163,29 @@ test('proxy DELETE request', function () {
         ->assertOk();
 
     Http::assertSent(fn (Request $request) => $request->method() === 'DELETE');
+});
+
+test('proxy and do cache', function () {
+    $file = storage_path('framework/views/frontier-GET-frontier-test-with-cache');
+    $text = 'Frontier by HTTP';
+
+    Http::fake([
+        'frontier.test/*' => Http::response($text),
+    ]);
+
+    $this->assertFileDoesNotExist($file);
+
+    $this->get('/with-cache')
+        ->assertStatus(200)
+        ->assertSeeText($text);
+
+    $this->assertFileExists($file);
+    $this->assertStringEqualsFile($file, $text);
+
+    $this->get('/with-cache')
+        ->assertStatus(200)
+        ->assertSeeText($text);
+
+    // Remove cache
+    $this->artisan('view:clear');
 });

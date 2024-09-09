@@ -16,8 +16,16 @@ class FrontendProxyController
 
     public function __invoke($uri, $config): Response
     {
+        $method = $this->request->getMethod();
         $accept = $this->request->header('accept', '*/*');
         $url = trim($config['url'], '/') . '/' . trim($uri, '/');
+        $cacheKey = str($config['url'])->replace(['/', '.'], '-')->value();
+
+        $path = storage_path("framework/views/frontier-$method-$cacheKey");
+
+        if ($method === 'GET' && $config['cache'] && file_exists($path)) {
+            return new Response(file_get_contents($path));
+        }
 
         if ($config['rewrite']) {
             $url = str_replace(
@@ -31,7 +39,7 @@ class FrontendProxyController
             'Accept' => $accept,
         ]);
 
-        $response = match ($this->request->getMethod()) {
+        $response = match ($method) {
             'GET' => $http->get($url),
             'HEAD' => $http->head($url),
             'POST' => $http->post($url, $this->request->all()),
@@ -49,6 +57,10 @@ class FrontendProxyController
                 array_values($config['replaces']),
                 $content
             );
+        }
+
+        if ($config['cache']) {
+            file_put_contents($path, $content);
         }
 
         return new Response($content, headers: [
