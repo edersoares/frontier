@@ -42,6 +42,7 @@ class Frontier
 
             $url = $host;
             $uri = $segments[0];
+            $methods = [];
             $replaces = [];
             $rewrite = [];
             $proxyAll = true;
@@ -49,6 +50,16 @@ class Frontier
             foreach ($segments as $segment) {
                 if ($segment === 'exact') {
                     $proxyAll = false;
+                }
+
+                $methods = ['GET']; // Need to be reseted each loop
+
+                if (str_starts_with($segment, 'methods(') && str_ends_with($segment, ')')) {
+                    $replace = substr($segment, 8, -1);
+
+                    $methods = explode(',', $replace . ',');
+                    $methods = array_filter($methods);
+                    $methods = array_map(fn ($method) => strtoupper($method), $methods);
                 }
 
                 if (str_starts_with($segment, 'replace(') && str_ends_with($segment, ')')) {
@@ -79,7 +90,7 @@ class Frontier
 
             $uri = str_replace('//', '/', $uri);
 
-            Route::get($uri, FrontendProxyController::class)
+            Route::match($methods, $uri, FrontendProxyController::class)
                 ->where('uri', '.*')
                 ->setDefaults([
                     'uri' => $uri,
@@ -87,6 +98,7 @@ class Frontier
                         'url' => $url,
                         'replaces' => $replaces,
                         'rewrite' => $rewrite,
+                        'methods' => $methods,
                     ],
                 ]);
         }
