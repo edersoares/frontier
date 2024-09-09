@@ -45,9 +45,16 @@ class Frontier
             $methods = [];
             $replaces = [];
             $rewrite = [];
+            $cache = false;
             $proxyAll = true;
 
             foreach ($segments as $segment) {
+                $cache = false;
+
+                if ($segment === 'cache') {
+                    $cache = true;
+                }
+
                 if ($segment === 'exact') {
                     $proxyAll = false;
                 }
@@ -99,6 +106,7 @@ class Frontier
                         'replaces' => $replaces,
                         'rewrite' => $rewrite,
                         'methods' => $methods,
+                        'cache' => $cache,
                     ],
                 ]);
         }
