@@ -21,6 +21,7 @@ beforeEach(fn () => Frontier::add([
         '/web',
         '/all-methods::methods(get,head,options,post,put,patch,delete)',
         '/with-cache::cache',
+        '/middleware::middleware(auth)',
     ],
 ]));
 
@@ -188,4 +189,13 @@ test('proxy and do cache', function () {
 
     // Remove cache
     $this->artisan('view:clear');
+});
+
+test('proxy passing by middleware', function () {
+    Http::fake([
+        'frontier.test/*',
+    ]);
+
+    $this->getJson('/middleware')
+        ->assertStatus(401);
 });
