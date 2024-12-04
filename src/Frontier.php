@@ -45,6 +45,7 @@ class Frontier
             $methods = [];
             $replaces = [];
             $rewrite = [];
+            $middleware = [];
             $cache = false;
             $proxyAll = true;
 
@@ -67,6 +68,12 @@ class Frontier
                     $methods = explode(',', $replace . ',');
                     $methods = array_filter($methods);
                     $methods = array_map(fn ($method) => strtoupper($method), $methods);
+                }
+
+                if (str_starts_with($segment, 'middleware(') && str_ends_with($segment, ')')) {
+                    $replace = substr($segment, 11, -1);
+
+                    $middleware[] = $replace;
                 }
 
                 if (str_starts_with($segment, 'replace(') && str_ends_with($segment, ')')) {
@@ -98,6 +105,7 @@ class Frontier
             $uri = str_replace('//', '/', $uri);
 
             Route::match($methods, $uri, FrontendProxyController::class)
+                ->middleware($middleware)
                 ->where('uri', '.*')
                 ->setDefaults([
                     'uri' => $uri,
