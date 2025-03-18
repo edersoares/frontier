@@ -13,10 +13,9 @@
     ],
     "require": {
         "guzzlehttp/guzzle": "^7",
-        "illuminate/http": "^9|^10|^11",
-        "illuminate/support": "^9|^10|^11",
-        "illuminate/view": "^9|^10|^11"
-
+        "illuminate/http": "^9|^10|^11|^12",
+        "illuminate/support": "^9|^10|^11|^12",
+        "illuminate/view": "^9|^10|^11|^12"
     },
     "require-dev": {
         "laravel/pint": "^1.10",
