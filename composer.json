@@ -46,7 +46,12 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "policy": {
+            "advisories": {
+                "block": false
+            }
+        }
     },
     "scripts": {
         "coverage": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",

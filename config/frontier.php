@@ -59,4 +59,6 @@ return [
 
     ],
 
+    'frontend' => env('FRONTIER_FRONTEND', env('FRONTEND_URL')),
+
 ];
