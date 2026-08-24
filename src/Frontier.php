@@ -97,18 +97,22 @@ class Frontier
                 }
             }
 
+            $proxyUri = $uri;
+
             if ($proxyAll) {
-                $url = $url . $uri;
-                $uri .= '/{uri?}';
+                $url .= $proxyUri;
+                $routeUri = $proxyUri . '/{uri?}';
+            } else {
+                $routeUri = $proxyUri;
             }
 
-            $uri = str_replace('//', '/', $uri);
+            $routeUri = str_replace('//', '/', $routeUri);
 
-            Route::match($methods, $uri, FrontendProxyController::class)
+            Route::match($methods, $routeUri, FrontendProxyController::class)
                 ->middleware($middleware)
                 ->where('uri', '.*')
                 ->setDefaults([
-                    'uri' => $uri,
+                    'uri' => $proxyUri,
                     'config' => [
                         'url' => $url,
                         'replaces' => $replaces,
