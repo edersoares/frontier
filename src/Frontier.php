@@ -134,7 +134,7 @@ class Frontier
         $controller = match ($config['type']) {
             'http' => FrontendHttpController::class,
             'view' => FrontendViewController::class,
-            default => throw new InvalidArgumentException('Unknown controller type'),
+            default => throw new InvalidArgumentException('Unknown controller type'), // @codeCoverageIgnore
         };
 
         Route::get($config['endpoint'] . '/{uri?}', $controller)
