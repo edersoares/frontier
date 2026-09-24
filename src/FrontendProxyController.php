@@ -98,6 +98,10 @@ class FrontendProxyController
             $url .= '/';
         }
 
+        if ($query = $request->getQueryString()) {
+            $url .= '?' . $query;
+        }
+
         return $url;
     }
 

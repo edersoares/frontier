@@ -96,6 +96,32 @@ test('proxy all routes requests the host with the same path', function () {
     ]);
 });
 
+test('proxy forwards the query string', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('OK'),
+    ]);
+
+    $this->get('/web/asset.js?v=1&x=2')->assertOk();
+    $this->head('/web/asset.js?v=3')->assertOk();
+
+    expect(Http::recorded()->map(fn (array $pair) => $pair[0]->url())->all())->toBe([
+        'frontier.test/web/asset.js?v=1&x=2',
+        'frontier.test/web/asset.js?v=3',
+    ]);
+});
+
+test('proxy caches each query string separately', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('Cached'),
+    ]);
+
+    $this->get('/with-cache?v=1')->assertHeader('x-frontier-cache', 'miss');
+    $this->get('/with-cache?v=2')->assertHeader('x-frontier-cache', 'miss');
+    $this->get('/with-cache?v=1')->assertHeader('x-frontier-cache', 'hit');
+
+    Http::assertSentCount(2);
+});
+
 test('proxy root rule requests the host root', function () {
     Frontier::add([
         'enabled' => true,
@@ -479,18 +505,18 @@ test('proxy resolves the url at request time', function () {
     Frontier::resolveUrlUsing(function (string $url, HttpRequest $request, array $config) {
         expect($config['url'])->toBe('frontier.test/web');
 
-        return str_replace('frontier.test', 'v2.frontier.test', $url) . '?tenant=' . $request->query('tenant');
+        return str_replace('frontier.test', $request->query('tenant') . '.frontier.test', $url);
     });
 
     Http::fake([
-        'v2.frontier.test/*' => Http::response('Version 2'),
+        'acme.frontier.test/*' => Http::response('Acme'),
     ]);
 
     $this->get('/web/page?tenant=acme')
         ->assertOk()
-        ->assertContent('Version 2');
+        ->assertContent('Acme');
 
-    Http::assertSent(fn (Request $request) => $request->url() === 'v2.frontier.test/web/page?tenant=acme');
+    Http::assertSent(fn (Request $request) => $request->url() === 'acme.frontier.test/web/page?tenant=acme');
 });
 
 test('proxy caches each resolved url separately', function () {

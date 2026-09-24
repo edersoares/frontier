@@ -19,7 +19,8 @@ Tarefa extra, encontrada durante a implementação: uma regra com prefixo (`/new
 `host/new/new` ao abrir `/new`, porque o default do parâmetro `{uri?}` repetia o prefixo. Corrigido: o caminho
 pedido ao host espelha o do navegador, inclusive a barra final. De passagem, o `Request` passou a ser injetado no
 `__invoke` em vez do construtor, pois a instância do controller é reaproveitada pela rota e o request ficava preso
-ao primeiro pedido em processos de longa duração.
+ao primeiro pedido em processos de longa duração. A query string, antes descartada em GET e HEAD, passou a ser
+repassada ao host e entra na chave de cache.
 
 Status em 24/09/2026: as seis tarefas foram implementadas na branch `proxy-improvements`, um commit por
 tarefa, com cobertura de testes em 100%. Resta abrir o PR, publicar a release e validar em staging do i-Educar.
