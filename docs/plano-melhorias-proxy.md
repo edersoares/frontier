@@ -15,6 +15,9 @@ e entrega de valor isolada. A ordem abaixo é a ordem de execução, pois cada t
 
 Total estimado: 2 a 3 dias, incluindo docs e release.
 
+Status em 24/09/2026: as seis tarefas foram implementadas na branch `proxy-improvements`, um commit por
+tarefa, com cobertura de testes em 100%. Resta abrir o PR, publicar a release e validar em staging do i-Educar.
+
 Fora do escopo desta rodada: `FrontendHttpController` tem os mesmos problemas de status e cache em
 arquivo. Após as tarefas 1 e 3, avaliar se vale alinhar ou depreciar o tipo `http` em favor do `proxy`.
 
