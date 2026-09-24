@@ -24,23 +24,25 @@ composer require dex/frontier
 
 You can configure your frontend using some environment variables described below.
 
-| Variable                | Description                                                 | Default                   |
-|-------------------------|-------------------------------------------------------------|---------------------------|
-| `FRONTIER_TYPE`         | Define type of controller `http`, `proxy` or `view`         | `view`                    |
-| `FRONTIER_ENDPOINT`     | Endpoint where the frontend will run                        | `frontier`                |
-| `FRONTIER_VIEW`         | Default `view` that will be rendered or `url` of the server | `frontier::index`         |
-| `FRONTIER_VIEWS_PATH`   | Directory where all the `views` are                         | `frontier/resources/html` |
-| `FRONTIER_FIND`         | Content that will be replaced                               |                           |
-| `FRONTIER_REPLACE_WITH` | Content that will be the replacement                        |                           |
-| `FRONTIER_PROXY`        | URIs that you will do proxy                                 |                           |
-| `FRONTIER_CACHE`        | When `http` type, indicates se cache will be do             | `true`                    |
-| `FRONTIER_PROXY_HOST`   | `url` of the assets server                                  |                           |
-| `FRONTIER_PROXY_RULES`  | Proxy rules                                                 |                           |
-| `FRONTIER_PROXY_TIMEOUT` | Seconds to wait for the proxied host to respond            | `5`                       |
-| `FRONTIER_PROXY_CONNECT_TIMEOUT` | Seconds to wait when connecting to the proxied host | `2`                      |
-| `FRONTIER_PROXY_CACHE_STORE` | Cache store used by the `cache` rule segment, default store when empty |              |
-| `FRONTIER_PROXY_CACHE_TTL` | Seconds a cached proxy response stays fresh                | `60`                      |
-| `FRONTIER_PROXY_CACHE_STALE_TTL` | Seconds the last good response is kept to serve when the host fails | `86400`        |
+| Variable                         | Description                                                            | Default                   |
+|-----------------------------------|-------------------------------------------------------------------------|---------------------------|
+| `FRONTIER_DEFAULT_ENABLED`        | Enables the default `frontier` frontend                                | `true`                    |
+| `FRONTIER_TYPE`                   | Define type of controller `http`, `proxy` or `view`                    | `view`                    |
+| `FRONTIER_ENDPOINT`               | Endpoint where the frontend will run                                   | `frontier`                |
+| `FRONTIER_VIEW`                   | Default `view` that will be rendered or `url` of the server            | `frontier::index`         |
+| `FRONTIER_VIEWS_PATH`             | Directory where all the `views` are                                    | `frontier/resources/html` |
+| `FRONTIER_FIND`                   | Content that will be replaced                                          |                           |
+| `FRONTIER_REPLACE_WITH`           | Content that will be the replacement                                   |                           |
+| `FRONTIER_PROXY`                  | URIs that you will do proxy                                            |                           |
+| `FRONTIER_CACHE`                  | When `http` type, indicates if the response will be cached             | `true`                    |
+| `FRONTIER_PROXY_ENABLED`          | Enables the default `proxy` frontend                                   | `true`                    |
+| `FRONTIER_PROXY_HOST`             | `url` of the assets server                                             |                           |
+| `FRONTIER_PROXY_RULES`            | Proxy rules                                                            |                           |
+| `FRONTIER_PROXY_TIMEOUT`          | Seconds to wait for the proxied host to respond                        | `5`                       |
+| `FRONTIER_PROXY_CONNECT_TIMEOUT`  | Seconds to wait when connecting to the proxied host                    | `2`                       |
+| `FRONTIER_PROXY_CACHE_STORE`      | Cache store used by the `cache` rule segment, default store when empty |                           |
+| `FRONTIER_PROXY_CACHE_TTL`        | Seconds a cached proxy response stays fresh                            | `60`                      |
+| `FRONTIER_PROXY_CACHE_STALE_TTL`  | Seconds the last good response is kept to serve when the host fails    | `86400`                   |
 
 ### Frontend types
 
@@ -58,6 +60,9 @@ Use in `FRONTIER_PROXY_HOST` or `FRONTIER_VIEW` the URL of your frontend server.
 
 `FRONTIER_PROXY_RULES` is a list of rules separated by `|`. Each rule starts with the URI to proxy, followed by
 optional segments separated by `::`.
+
+> The status forwarding, timeouts, cache and URL resolver described below apply to the `proxy` type only. The
+> `http` type keeps the older per-server file cache, with no status forwarding and no expiration.
 
 | Segment                     | Description                                                                |
 |-----------------------------|----------------------------------------------------------------------------|
