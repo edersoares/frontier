@@ -227,3 +227,31 @@ test('proxy methods segment is kept when it is not the last segment', function (
     $this->put('/methods-first')
         ->assertMethodNotAllowed();
 });
+
+test('proxy forwards the upstream status code', function () {
+    Http::fake([
+        'frontier.test/web/missing' => Http::response('Not found', 404),
+        'frontier.test/web/broken' => Http::response('Boom', 500),
+    ]);
+
+    $this->get('/web/missing')
+        ->assertNotFound()
+        ->assertContent('Not found');
+
+    $this->get('/web/broken')
+        ->assertStatus(500)
+        ->assertContent('Boom');
+});
+
+test('proxy does not cache failed responses', function () {
+    $file = storage_path('framework/views/frontier-GET-frontier-test-with-cache');
+
+    Http::fake([
+        'frontier.test/*' => Http::response('Boom', 500),
+    ]);
+
+    $this->get('/with-cache')
+        ->assertStatus(500);
+
+    $this->assertFileDoesNotExist($file);
+});

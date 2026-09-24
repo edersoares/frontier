@@ -49,7 +49,7 @@ class FrontendProxyController
         };
 
         $content = $response->body();
-        $contextType = $response->header('content-type');
+        $contentType = $response->header('content-type');
 
         if ($config['replaces']) {
             $content = str_replace(
@@ -59,12 +59,12 @@ class FrontendProxyController
             );
         }
 
-        if ($config['cache']) {
+        if ($config['cache'] && $response->successful()) {
             file_put_contents($path, $content);
         }
 
-        return new Response($content, headers: [
-            'content-type' => $contextType,
+        return new Response($content, $response->status(), [
+            'content-type' => $contentType,
         ]);
     }
 }

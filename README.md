@@ -51,6 +51,21 @@ Use in `FRONTIER_PROXY_HOST` or `FRONTIER_VIEW` the URL of your frontend server.
 
 > `FRONTIER_VIEW` will be removed in the future.
 
+`FRONTIER_PROXY_RULES` is a list of rules separated by `|`. Each rule starts with the URI to proxy, followed by
+optional segments separated by `::`.
+
+| Segment                     | Description                                                                |
+|-----------------------------|----------------------------------------------------------------------------|
+| `exact`                     | Proxy only this URI, not everything under it                               |
+| `cache`                     | Cache successful `GET` responses                                           |
+| `methods(get,post,...)`     | HTTP methods accepted by the route, `GET` by default                       |
+| `middleware(name)`          | Middleware applied to the route, repeatable                                |
+| `replace(search,replace)`   | Replace text in the response body, `replace` defaults to the proxied URL   |
+| `rewrite(search,replace)`   | Rewrite the URL requested from the host                                    |
+
+The status code returned by the host is forwarded to the client, so a `404` or `500` from your frontend server is
+seen as such by the browser. Failed responses are never cached.
+
 #### View
 
 Use in `FRONTIER_VIEW` the name of your view that you initialize your frontend, this is relative a Blade views.
