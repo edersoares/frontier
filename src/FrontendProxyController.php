@@ -7,6 +7,7 @@ namespace Dex\Laravel\Frontier;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class FrontendProxyController
@@ -20,13 +21,6 @@ class FrontendProxyController
         $method = $this->request->getMethod();
         $accept = $this->request->header('accept', '*/*');
         $url = trim($config['url'], '/') . '/' . trim($uri, '/');
-        $cacheKey = str($config['url'])->replace(['/', '.'], '-')->value();
-
-        $path = storage_path("framework/views/frontier-$method-$cacheKey");
-
-        if ($method === 'GET' && $config['cache'] && file_exists($path)) {
-            return new Response(file_get_contents($path));
-        }
 
         if ($config['rewrite']) {
             $url = str_replace(
@@ -34,6 +28,14 @@ class FrontendProxyController
                 array_values($config['rewrite']),
                 $url
             );
+        }
+
+        $cacheable = $method === 'GET' && $config['cache'];
+        $cacheKey = 'frontier:proxy:' . sha1($url);
+        $store = Cache::store($config['cache_store']);
+
+        if ($cacheable && ($cached = $store->get($cacheKey))) {
+            return $this->response($cached['content'], Response::HTTP_OK, $cached['content_type'], 'hit');
         }
 
         $http = Http::withHeaders([
@@ -66,12 +68,24 @@ class FrontendProxyController
             );
         }
 
-        if ($config['cache'] && $response->successful()) {
-            file_put_contents($path, $content);
+        if ($cacheable && $response->successful()) {
+            $store->put($cacheKey, [
+                'content' => $content,
+                'content_type' => $contentType,
+            ], $config['cache_ttl']);
         }
 
-        return new Response($content, $response->status(), [
-            'content-type' => $contentType,
-        ]);
+        return $this->response($content, $response->status(), $contentType, $cacheable ? 'miss' : null);
+    }
+
+    private function response(string $content, int $status, string $contentType, ?string $cache): Response
+    {
+        $headers = ['content-type' => $contentType];
+
+        if ($cache) {
+            $headers['x-frontier-cache'] = $cache;
+        }
+
+        return new Response($content, $status, $headers);
     }
 }

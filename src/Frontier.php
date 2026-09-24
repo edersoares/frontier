@@ -118,6 +118,8 @@ class Frontier
                         'cache' => $cache,
                         'timeout' => (int) ($config['timeout'] ?? 5),
                         'connect_timeout' => (int) ($config['connect_timeout'] ?? 2),
+                        'cache_store' => $config['cache_store'] ?? null,
+                        'cache_ttl' => (int) ($config['cache_ttl'] ?? 60),
                     ],
                 ]);
         }

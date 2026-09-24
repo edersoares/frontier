@@ -8,10 +8,14 @@ use Dex\Laravel\Frontier\Frontier;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Http\Request as HttpRequest;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
-beforeEach(fn () => Frontier::add([
+beforeEach(function () {
+    config(['cache.default' => 'array']);
+
+    Frontier::add([
     'enabled' => true,
     'type' => 'proxy',
     'host' => 'frontier.test',
@@ -28,7 +32,15 @@ beforeEach(fn () => Frontier::add([
         '/cache-first::cache::middleware(Illuminate\\Routing\\Middleware\\SubstituteBindings)',
         '/methods-first::methods(get,post)::replace(Replace,Done)',
     ],
-]));
+]);
+});
+
+function cacheKey(): string
+{
+    $url = Http::recorded()->first()[0]->url();
+
+    return 'frontier:proxy:' . sha1($url);
+}
 
 test('proxy exact route', function () {
     Http::fake([
@@ -172,28 +184,92 @@ test('proxy DELETE request', function () {
 });
 
 test('proxy and do cache', function () {
-    $file = storage_path('framework/views/frontier-GET-frontier-test-with-cache');
     $text = 'Frontier by HTTP';
 
     Http::fake([
-        'frontier.test/*' => Http::response($text),
+        'frontier.test/*' => Http::response($text, headers: ['Content-Type' => 'application/javascript']),
     ]);
 
-    $this->assertFileDoesNotExist($file);
-
     $this->get('/with-cache')
-        ->assertStatus(200)
+        ->assertOk()
+        ->assertHeader('x-frontier-cache', 'miss')
         ->assertSeeText($text);
 
-    $this->assertFileExists($file);
-    $this->assertStringEqualsFile($file, $text);
+    expect(Cache::get(cacheKey()))->toBe(['content' => $text, 'content_type' => 'application/javascript']);
 
     $this->get('/with-cache')
-        ->assertStatus(200)
+        ->assertOk()
+        ->assertHeader('x-frontier-cache', 'hit')
+        ->assertHeader('content-type', 'application/javascript')
         ->assertSeeText($text);
 
-    // Remove cache
-    $this->artisan('view:clear');
+    Http::assertSentCount(1);
+});
+
+test('proxy caches each uri separately', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('Cached'),
+    ]);
+
+    $this->get('/with-cache/a')->assertOk();
+    $this->get('/with-cache/b')->assertOk();
+    $this->get('/with-cache/a')->assertHeader('x-frontier-cache', 'hit');
+
+    Http::assertSentCount(2);
+});
+
+test('proxy cache expires after the configured ttl', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('Cached'),
+    ]);
+
+    $this->get('/with-cache')->assertOk();
+
+    $this->travel(61)->seconds();
+
+    $this->get('/with-cache')->assertHeader('x-frontier-cache', 'miss');
+
+    Http::assertSentCount(2);
+});
+
+test('proxy does not add the cache header when cache is disabled', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('Plain'),
+    ]);
+
+    $this->get('/web')
+        ->assertOk()
+        ->assertHeaderMissing('x-frontier-cache');
+});
+
+test('proxy uses the configured cache store and ttl', function () {
+    config([
+        'cache.stores.none' => ['driver' => 'null'],
+        'cache.default' => 'none',
+    ]);
+
+    Frontier::add([
+        'enabled' => true,
+        'type' => 'proxy',
+        'host' => 'frontier.test',
+        'cache_store' => 'array',
+        'cache_ttl' => 10,
+        'rules' => ['/store::cache'],
+    ]);
+
+    Http::fake([
+        'frontier.test/*' => Http::response('Stored'),
+    ]);
+
+    $this->get('/store')->assertOk();
+
+    expect(Cache::store('array')->has(cacheKey()))->toBeTrue();
+
+    $this->travel(11)->seconds();
+
+    $this->get('/store')->assertHeader('x-frontier-cache', 'miss');
+
+    Http::assertSentCount(2);
 });
 
 test('proxy passing by middleware', function () {
@@ -214,8 +290,6 @@ test('proxy cache segment is kept when it is not the last segment', function () 
     $this->get('/cache-first')->assertOk()->assertContent('Cached');
 
     Http::assertSentCount(1);
-
-    $this->artisan('view:clear');
 });
 
 test('proxy methods segment is kept when it is not the last segment', function () {
@@ -247,16 +321,15 @@ test('proxy forwards the upstream status code', function () {
 });
 
 test('proxy does not cache failed responses', function () {
-    $file = storage_path('framework/views/frontier-GET-frontier-test-with-cache');
-
     Http::fake([
         'frontier.test/*' => Http::response('Boom', 500),
     ]);
 
     $this->get('/with-cache')
-        ->assertStatus(500);
+        ->assertStatus(500)
+        ->assertHeader('x-frontier-cache', 'miss');
 
-    $this->assertFileDoesNotExist($file);
+    expect(Cache::has(cacheKey()))->toBeFalse();
 });
 
 test('proxy returns 504 when the host cannot be reached', function () {

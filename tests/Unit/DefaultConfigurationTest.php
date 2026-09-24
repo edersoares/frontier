@@ -26,3 +26,10 @@ test('proxy timeouts default to 5 and 2 seconds', function () {
         ->and(config('frontier.frontier.timeout'))->toBe(5)
         ->and(config('frontier.frontier.connect_timeout'))->toBe(2);
 });
+
+test('proxy cache uses the default store with a ttl of 60 seconds', function () {
+    expect(config('frontier.proxy.cache_store'))->toBeNull()
+        ->and(config('frontier.proxy.cache_ttl'))->toBe(60)
+        ->and(config('frontier.frontier.cache_store'))->toBeNull()
+        ->and(config('frontier.frontier.cache_ttl'))->toBe(60);
+});

@@ -38,6 +38,8 @@ You can configure your frontend using some environment variables described below
 | `FRONTIER_PROXY_RULES`  | Proxy rules                                                 |                           |
 | `FRONTIER_PROXY_TIMEOUT` | Seconds to wait for the proxied host to respond            | `5`                       |
 | `FRONTIER_PROXY_CONNECT_TIMEOUT` | Seconds to wait when connecting to the proxied host | `2`                      |
+| `FRONTIER_PROXY_CACHE_STORE` | Cache store used by the `cache` rule segment, default store when empty |              |
+| `FRONTIER_PROXY_CACHE_TTL` | Seconds a cached proxy response stays fresh                | `60`                      |
 
 ### Frontend types
 
@@ -70,6 +72,17 @@ seen as such by the browser. Failed responses are never cached.
 
 When the host cannot be reached within `FRONTIER_PROXY_CONNECT_TIMEOUT` or does not answer within
 `FRONTIER_PROXY_TIMEOUT`, the proxy responds with `504 Gateway Timeout` instead of holding the PHP worker.
+
+##### Cache
+
+Rules with the `cache` segment store successful `GET` responses in the Laravel cache, using the store defined by
+`FRONTIER_PROXY_CACHE_STORE` and a TTL of `FRONTIER_PROXY_CACHE_TTL` seconds. The key is derived from the final
+URL requested from the host, so every URI is cached on its own and the cache is shared by all the servers that
+share the store.
+
+Responses carry an `X-Frontier-Cache` header with `hit` or `miss`, which is handy to check with `curl -I`.
+To invalidate everything at once run `php artisan cache:clear`, or point `FRONTIER_PROXY_CACHE_STORE` to a
+dedicated store so it can be flushed without touching the rest of the application cache.
 
 #### View
 

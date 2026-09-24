@@ -49,6 +49,10 @@ return [
 
         'connect_timeout' => (int) env('FRONTIER_PROXY_CONNECT_TIMEOUT', 2),
 
+        'cache_store' => env('FRONTIER_PROXY_CACHE_STORE'),
+
+        'cache_ttl' => (int) env('FRONTIER_PROXY_CACHE_TTL', 60),
+
     ],
 
     'proxy' => [
@@ -64,6 +68,10 @@ return [
         'timeout' => (int) env('FRONTIER_PROXY_TIMEOUT', 5),
 
         'connect_timeout' => (int) env('FRONTIER_PROXY_CONNECT_TIMEOUT', 2),
+
+        'cache_store' => env('FRONTIER_PROXY_CACHE_STORE'),
+
+        'cache_ttl' => (int) env('FRONTIER_PROXY_CACHE_TTL', 60),
 
     ],
 
