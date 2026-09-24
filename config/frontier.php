@@ -45,6 +45,16 @@ return [
 
         'rules' => array_filter(explode('|', env('FRONTIER_PROXY_RULES', ''))),
 
+        'timeout' => (int) env('FRONTIER_PROXY_TIMEOUT', 5),
+
+        'connect_timeout' => (int) env('FRONTIER_PROXY_CONNECT_TIMEOUT', 2),
+
+        'cache_store' => env('FRONTIER_PROXY_CACHE_STORE'),
+
+        'cache_ttl' => (int) env('FRONTIER_PROXY_CACHE_TTL', 60),
+
+        'cache_stale_ttl' => (int) env('FRONTIER_PROXY_CACHE_STALE_TTL', 86400),
+
     ],
 
     'proxy' => [
@@ -56,6 +66,16 @@ return [
         'host' => env('FRONTIER_PROXY_HOST', env('FRONTIER_VIEW', '')),
 
         'rules' => array_filter(explode('|', env('FRONTIER_PROXY_RULES', ''))),
+
+        'timeout' => (int) env('FRONTIER_PROXY_TIMEOUT', 5),
+
+        'connect_timeout' => (int) env('FRONTIER_PROXY_CONNECT_TIMEOUT', 2),
+
+        'cache_store' => env('FRONTIER_PROXY_CACHE_STORE'),
+
+        'cache_ttl' => (int) env('FRONTIER_PROXY_CACHE_TTL', 60),
+
+        'cache_stale_ttl' => (int) env('FRONTIER_PROXY_CACHE_STALE_TTL', 86400),
 
     ],
 

@@ -24,18 +24,25 @@ composer require dex/frontier
 
 You can configure your frontend using some environment variables described below.
 
-| Variable                | Description                                                 | Default                   |
-|-------------------------|-------------------------------------------------------------|---------------------------|
-| `FRONTIER_TYPE`         | Define type of controller `http`, `proxy` or `view`         | `view`                    |
-| `FRONTIER_ENDPOINT`     | Endpoint where the frontend will run                        | `frontier`                |
-| `FRONTIER_VIEW`         | Default `view` that will be rendered or `url` of the server | `frontier::index`         |
-| `FRONTIER_VIEWS_PATH`   | Directory where all the `views` are                         | `frontier/resources/html` |
-| `FRONTIER_FIND`         | Content that will be replaced                               |                           |
-| `FRONTIER_REPLACE_WITH` | Content that will be the replacement                        |                           |
-| `FRONTIER_PROXY`        | URIs that you will do proxy                                 |                           |
-| `FRONTIER_CACHE`        | When `http` type, indicates se cache will be do             | `true`                    |
-| `FRONTIER_PROXY_HOST`   | `url` of the assets server                                  |                           |
-| `FRONTIER_PROXY_RULES`  | Proxy rules                                                 |                           |
+| Variable                         | Description                                                            | Default                   |
+|-----------------------------------|-------------------------------------------------------------------------|---------------------------|
+| `FRONTIER_DEFAULT_ENABLED`        | Enables the default `frontier` frontend                                | `true`                    |
+| `FRONTIER_TYPE`                   | Define type of controller `http`, `proxy` or `view`                    | `view`                    |
+| `FRONTIER_ENDPOINT`               | Endpoint where the frontend will run                                   | `frontier`                |
+| `FRONTIER_VIEW`                   | Default `view` that will be rendered or `url` of the server            | `frontier::index`         |
+| `FRONTIER_VIEWS_PATH`             | Directory where all the `views` are                                    | `frontier/resources/html` |
+| `FRONTIER_FIND`                   | Content that will be replaced                                          |                           |
+| `FRONTIER_REPLACE_WITH`           | Content that will be the replacement                                   |                           |
+| `FRONTIER_PROXY`                  | URIs that you will do proxy                                            |                           |
+| `FRONTIER_CACHE`                  | When `http` type, indicates if the response will be cached             | `true`                    |
+| `FRONTIER_PROXY_ENABLED`          | Enables the default `proxy` frontend                                   | `true`                    |
+| `FRONTIER_PROXY_HOST`             | `url` of the assets server                                             |                           |
+| `FRONTIER_PROXY_RULES`            | Proxy rules                                                            |                           |
+| `FRONTIER_PROXY_TIMEOUT`          | Seconds to wait for the proxied host to respond                        | `5`                       |
+| `FRONTIER_PROXY_CONNECT_TIMEOUT`  | Seconds to wait when connecting to the proxied host                    | `2`                       |
+| `FRONTIER_PROXY_CACHE_STORE`      | Cache store used by the `cache` rule segment, default store when empty |                           |
+| `FRONTIER_PROXY_CACHE_TTL`        | Seconds a cached proxy response stays fresh                            | `60`                      |
+| `FRONTIER_PROXY_CACHE_STALE_TTL`  | Seconds the last good response is kept to serve when the host fails    | `86400`                   |
 
 ### Frontend types
 
@@ -50,6 +57,47 @@ Use in `FRONTIER_VIEW` the URL of your frontend server.
 Use in `FRONTIER_PROXY_HOST` or `FRONTIER_VIEW` the URL of your frontend server.
 
 > `FRONTIER_VIEW` will be removed in the future.
+
+`FRONTIER_PROXY_RULES` is a list of rules separated by `|`. Each rule starts with the URI to proxy, followed by
+optional segments separated by `::`.
+
+> The status forwarding, timeouts, cache and URL resolver described below apply to the `proxy` type only. The
+> `http` type keeps the older per-server file cache, with no status forwarding and no expiration.
+
+| Segment                     | Description                                                                |
+|-----------------------------|----------------------------------------------------------------------------|
+| `exact`                     | Proxy only this URI, not everything under it                               |
+| `cache`                     | Cache successful `GET` responses                                           |
+| `methods(get,post,...)`     | HTTP methods accepted by the route, `GET` by default                       |
+| `middleware(name)`          | Middleware applied to the route, repeatable                                |
+| `replace(search,replace)`   | Replace text in the response body, `replace` defaults to the proxied URL   |
+| `rewrite(search,replace)`   | Rewrite the URL requested from the host                                    |
+
+A rule without `exact` proxies the URI and everything under it. The path requested from the host mirrors the
+path requested by the browser, so with `FRONTIER_PROXY_HOST=https://cdn.test` and the rule `/new`, a request to
+`/new` fetches `https://cdn.test/new`, `/new/` fetches `https://cdn.test/new/` and `/new/about` fetches
+`https://cdn.test/new/about`. The query string is forwarded as well.
+
+The status code returned by the host is forwarded to the client, so a `404` or `500` from your frontend server is
+seen as such by the browser. Failed responses are never cached.
+
+When the host cannot be reached within `FRONTIER_PROXY_CONNECT_TIMEOUT` or does not answer within
+`FRONTIER_PROXY_TIMEOUT`, the proxy responds with `504 Gateway Timeout` instead of holding the PHP worker.
+
+##### Cache
+
+Rules with the `cache` segment store successful `GET` responses in the Laravel cache, using the store defined by
+`FRONTIER_PROXY_CACHE_STORE` and a TTL of `FRONTIER_PROXY_CACHE_TTL` seconds. The key is derived from the final
+URL requested from the host, so every URI is cached on its own and the cache is shared by all the servers that
+share the store.
+
+Every successful response is also kept as a stale copy for `FRONTIER_PROXY_CACHE_STALE_TTL` seconds. When the
+fresh copy has expired and the host answers a `5xx` or cannot be reached, the stale copy is served with status
+`200` so the frontend keeps working while the host is down. Client errors such as `404` are forwarded as is.
+
+Responses carry an `X-Frontier-Cache` header with `hit`, `miss` or `stale`, which is handy to check with `curl -I`.
+To invalidate everything at once run `php artisan cache:clear`, or point `FRONTIER_PROXY_CACHE_STORE` to a
+dedicated store so it can be flushed without touching the rest of the application cache.
 
 #### View
 
@@ -80,6 +128,25 @@ When using [Nuxt](https://nuxt.com/) you can start your project with these envir
 FRONTIER_PROXY_HOST=http://localhost:3000
 FRONTIER_PROXY_RULES=/_vfs.json::exact|/favicon.ico::exact::rewrite(/favicon.ico)|/__nuxt_devtools__/client/_nuxt/builds/meta|/__nuxt_devtools__/client::replace(/__nuxt_devtools__/client/_nuxt/)|/_nuxt|/_fonts|/::replace(/_nuxt/)
 ```
+
+### Resolving the proxy URL at runtime
+
+The host of a proxy rule is a fixed string read at boot. When you need to decide the URL per request, for
+example to pin a UI version per tenant, register a resolver in a service provider:
+
+```php
+use Dex\Laravel\Frontier\Frontier;
+use Illuminate\Http\Request;
+
+Frontier::resolveUrlUsing(function (string $url, Request $request, array $config) {
+    $version = tenant()->setting('ui_version', 'latest');
+
+    return str_replace('/latest/', "/$version/", $url);
+});
+```
+
+The resolver runs after the `rewrite` segments and before the request is sent. The cache key is derived from the
+resolved URL, so every version is cached on its own.
 
 ### Multiple frontends
 
