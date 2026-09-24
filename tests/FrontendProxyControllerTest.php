@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Dex\Laravel\Frontier\Tests;
 
 use Dex\Laravel\Frontier\Frontier;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
+use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
 
 beforeEach(fn () => Frontier::add([
     'enabled' => true,
@@ -254,4 +257,34 @@ test('proxy does not cache failed responses', function () {
         ->assertStatus(500);
 
     $this->assertFileDoesNotExist($file);
+});
+
+test('proxy returns 504 when the host cannot be reached', function () {
+    Http::fake(fn () => throw new ConnectionException('timeout'));
+
+    $this->get('/web')
+        ->assertStatus(504);
+});
+
+test('proxy uses the default timeouts', function () {
+    $route = Route::getRoutes()->match(HttpRequest::create('/web'));
+
+    expect($route->defaults['config']['timeout'])->toBe(5)
+        ->and($route->defaults['config']['connect_timeout'])->toBe(2);
+});
+
+test('proxy uses the configured timeouts', function () {
+    Frontier::add([
+        'enabled' => true,
+        'type' => 'proxy',
+        'host' => 'frontier.test',
+        'timeout' => 10,
+        'connect_timeout' => 3,
+        'rules' => ['/slow'],
+    ]);
+
+    $route = Route::getRoutes()->match(HttpRequest::create('/slow'));
+
+    expect($route->defaults['config']['timeout'])->toBe(10)
+        ->and($route->defaults['config']['connect_timeout'])->toBe(3);
 });

@@ -116,6 +116,8 @@ class Frontier
                         'rewrite' => $rewrite,
                         'methods' => $methods,
                         'cache' => $cache,
+                        'timeout' => (int) ($config['timeout'] ?? 5),
+                        'connect_timeout' => (int) ($config['connect_timeout'] ?? 2),
                     ],
                 ]);
         }

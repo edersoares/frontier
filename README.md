@@ -36,6 +36,8 @@ You can configure your frontend using some environment variables described below
 | `FRONTIER_CACHE`        | When `http` type, indicates se cache will be do             | `true`                    |
 | `FRONTIER_PROXY_HOST`   | `url` of the assets server                                  |                           |
 | `FRONTIER_PROXY_RULES`  | Proxy rules                                                 |                           |
+| `FRONTIER_PROXY_TIMEOUT` | Seconds to wait for the proxied host to respond            | `5`                       |
+| `FRONTIER_PROXY_CONNECT_TIMEOUT` | Seconds to wait when connecting to the proxied host | `2`                      |
 
 ### Frontend types
 
@@ -65,6 +67,9 @@ optional segments separated by `::`.
 
 The status code returned by the host is forwarded to the client, so a `404` or `500` from your frontend server is
 seen as such by the browser. Failed responses are never cached.
+
+When the host cannot be reached within `FRONTIER_PROXY_CONNECT_TIMEOUT` or does not answer within
+`FRONTIER_PROXY_TIMEOUT`, the proxy responds with `504 Gateway Timeout` instead of holding the PHP worker.
 
 #### View
 

@@ -45,6 +45,10 @@ return [
 
         'rules' => array_filter(explode('|', env('FRONTIER_PROXY_RULES', ''))),
 
+        'timeout' => (int) env('FRONTIER_PROXY_TIMEOUT', 5),
+
+        'connect_timeout' => (int) env('FRONTIER_PROXY_CONNECT_TIMEOUT', 2),
+
     ],
 
     'proxy' => [
@@ -56,6 +60,10 @@ return [
         'host' => env('FRONTIER_PROXY_HOST', env('FRONTIER_VIEW', '')),
 
         'rules' => array_filter(explode('|', env('FRONTIER_PROXY_RULES', ''))),
+
+        'timeout' => (int) env('FRONTIER_PROXY_TIMEOUT', 5),
+
+        'connect_timeout' => (int) env('FRONTIER_PROXY_CONNECT_TIMEOUT', 2),
 
     ],
 

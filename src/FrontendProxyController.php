@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dex\Laravel\Frontier;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
@@ -37,16 +38,22 @@ class FrontendProxyController
 
         $http = Http::withHeaders([
             'Accept' => $accept,
-        ]);
+        ])
+            ->timeout($config['timeout'])
+            ->connectTimeout($config['connect_timeout']);
 
-        $response = match ($method) {
-            'GET' => $http->get($url),
-            'HEAD' => $http->head($url),
-            'POST' => $http->post($url, $this->request->all()),
-            'PATCH' => $http->patch($url, $this->request->all()),
-            'PUT' => $http->put($url, $this->request->all()),
-            'DELETE' => $http->delete($url, $this->request->all()),
-        };
+        try {
+            $response = match ($method) {
+                'GET' => $http->get($url),
+                'HEAD' => $http->head($url),
+                'POST' => $http->post($url, $this->request->all()),
+                'PATCH' => $http->patch($url, $this->request->all()),
+                'PUT' => $http->put($url, $this->request->all()),
+                'DELETE' => $http->delete($url, $this->request->all()),
+            };
+        } catch (ConnectionException) {
+            return new Response('', Response::HTTP_GATEWAY_TIMEOUT);
+        }
 
         $content = $response->body();
         $contentType = $response->header('content-type');

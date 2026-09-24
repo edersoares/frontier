@@ -19,3 +19,10 @@ test('when `FRONTIER_REPLACE_WITH` is not informed `replaces` key should be empt
 
     expect($config)->toBeEmpty();
 });
+
+test('proxy timeouts default to 5 and 2 seconds', function () {
+    expect(config('frontier.proxy.timeout'))->toBe(5)
+        ->and(config('frontier.proxy.connect_timeout'))->toBe(2)
+        ->and(config('frontier.frontier.timeout'))->toBe(5)
+        ->and(config('frontier.frontier.connect_timeout'))->toBe(2);
+});
