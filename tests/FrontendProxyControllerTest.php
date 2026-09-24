@@ -22,6 +22,8 @@ beforeEach(fn () => Frontier::add([
         '/all-methods::methods(get,head,options,post,put,patch,delete)',
         '/with-cache::cache',
         '/middleware::middleware(auth)',
+        '/cache-first::cache::middleware(Illuminate\\Routing\\Middleware\\SubstituteBindings)',
+        '/methods-first::methods(get,post)::replace(Replace,Done)',
     ],
 ]));
 
@@ -198,4 +200,30 @@ test('proxy passing by middleware', function () {
 
     $this->getJson('/middleware')
         ->assertStatus(401);
+});
+
+test('proxy cache segment is kept when it is not the last segment', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('Cached'),
+    ]);
+
+    $this->get('/cache-first')->assertOk();
+    $this->get('/cache-first')->assertOk()->assertContent('Cached');
+
+    Http::assertSentCount(1);
+
+    $this->artisan('view:clear');
+});
+
+test('proxy methods segment is kept when it is not the last segment', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('Replace'),
+    ]);
+
+    $this->post('/methods-first')
+        ->assertContent('Done')
+        ->assertOk();
+
+    $this->put('/methods-first')
+        ->assertMethodNotAllowed();
 });

@@ -48,10 +48,9 @@ class Frontier
             $middleware = [];
             $cache = false;
             $proxyAll = true;
+            $methods = ['GET'];
 
             foreach ($segments as $segment) {
-                $cache = false;
-
                 if ($segment === 'cache') {
                     $cache = true;
                 }
@@ -59,8 +58,6 @@ class Frontier
                 if ($segment === 'exact') {
                     $proxyAll = false;
                 }
-
-                $methods = ['GET']; // Need to be reseted each loop
 
                 if (str_starts_with($segment, 'methods(') && str_ends_with($segment, ')')) {
                     $replace = substr($segment, 8, -1);
