@@ -31,6 +31,8 @@ class FrontendProxyController
             );
         }
 
+        $url = Frontier::resolveUrl($url, $this->request, $config);
+
         $cacheable = $method === 'GET' && $config['cache'];
         $cacheKey = 'frontier:proxy:' . sha1($url);
         $staleKey = 'frontier:proxy:stale:' . sha1($url);

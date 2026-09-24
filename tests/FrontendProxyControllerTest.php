@@ -35,6 +35,8 @@ beforeEach(function () {
 ]);
 });
 
+afterEach(fn () => Frontier::resolveUrlUsing(null));
+
 function cacheKey(): string
 {
     $url = Http::recorded()->first()[0]->url();
@@ -429,4 +431,51 @@ test('proxy does not fall back to the stale copy on client errors', function () 
     $this->get('/with-cache')
         ->assertNotFound()
         ->assertContent('Gone');
+});
+
+test('proxy resolves the url at request time', function () {
+    Frontier::resolveUrlUsing(function (string $url, HttpRequest $request, array $config) {
+        expect($config['url'])->toBe('frontier.test/web');
+
+        return str_replace('frontier.test', 'v2.frontier.test', $url) . '?tenant=' . $request->query('tenant');
+    });
+
+    Http::fake([
+        'v2.frontier.test/*' => Http::response('Version 2'),
+    ]);
+
+    $this->get('/web/page?tenant=acme')
+        ->assertOk()
+        ->assertContent('Version 2');
+
+    Http::assertSent(fn (Request $request) => $request->url() === 'v2.frontier.test/web/page?tenant=acme');
+});
+
+test('proxy caches each resolved url separately', function () {
+    $version = 'v1';
+
+    Frontier::resolveUrlUsing(function (string $url) use (&$version) {
+        return str_replace('frontier.test', "$version.frontier.test", $url);
+    });
+
+    Http::fake([
+        'v1.frontier.test/*' => Http::response('Version 1'),
+        'v2.frontier.test/*' => Http::response('Version 2'),
+    ]);
+
+    $this->get('/with-cache')->assertContent('Version 1');
+
+    $version = 'v2';
+
+    $this->get('/with-cache')
+        ->assertContent('Version 2')
+        ->assertHeader('x-frontier-cache', 'miss');
+
+    $version = 'v1';
+
+    $this->get('/with-cache')
+        ->assertContent('Version 1')
+        ->assertHeader('x-frontier-cache', 'hit');
+
+    Http::assertSentCount(2);
 });

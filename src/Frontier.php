@@ -4,11 +4,35 @@ declare(strict_types=1);
 
 namespace Dex\Laravel\Frontier;
 
+use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use InvalidArgumentException;
 
 class Frontier
 {
+    protected static ?Closure $urlResolver = null;
+
+    /**
+     * Resolve the final URL requested from the proxied host at request time.
+     *
+     * The callback receives the URL, the current request and the rule config,
+     * and must return the URL to use. Pass null to remove the resolver.
+     */
+    public static function resolveUrlUsing(?Closure $resolver): void
+    {
+        static::$urlResolver = $resolver;
+    }
+
+    public static function resolveUrl(string $url, Request $request, array $config): string
+    {
+        if (static::$urlResolver === null) {
+            return $url;
+        }
+
+        return (static::$urlResolver)($url, $request, $config);
+    }
+
     public static function add(array $config): void
     {
         if (empty($config['enabled'])) {

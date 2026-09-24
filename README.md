@@ -119,6 +119,25 @@ FRONTIER_PROXY_HOST=http://localhost:3000
 FRONTIER_PROXY_RULES=/_vfs.json::exact|/favicon.ico::exact::rewrite(/favicon.ico)|/__nuxt_devtools__/client/_nuxt/builds/meta|/__nuxt_devtools__/client::replace(/__nuxt_devtools__/client/_nuxt/)|/_nuxt|/_fonts|/::replace(/_nuxt/)
 ```
 
+### Resolving the proxy URL at runtime
+
+The host of a proxy rule is a fixed string read at boot. When you need to decide the URL per request, for
+example to pin a UI version per tenant, register a resolver in a service provider:
+
+```php
+use Dex\Laravel\Frontier\Frontier;
+use Illuminate\Http\Request;
+
+Frontier::resolveUrlUsing(function (string $url, Request $request, array $config) {
+    $version = tenant()->setting('ui_version', 'latest');
+
+    return str_replace('/latest/', "/$version/", $url);
+});
+```
+
+The resolver runs after the `rewrite` segments and before the request is sent. The cache key is derived from the
+resolved URL, so every version is cached on its own.
+
 ### Multiple frontends
 
 You can run multiple frontends, just create a custom configuration file.
