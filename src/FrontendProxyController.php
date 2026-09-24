@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dex\Laravel\Frontier;
 
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,6 +33,7 @@ class FrontendProxyController
 
         $cacheable = $method === 'GET' && $config['cache'];
         $cacheKey = 'frontier:proxy:' . sha1($url);
+        $staleKey = 'frontier:proxy:stale:' . sha1($url);
         $store = Cache::store($config['cache_store']);
 
         if ($cacheable && ($cached = $store->get($cacheKey))) {
@@ -54,7 +56,12 @@ class FrontendProxyController
                 'DELETE' => $http->delete($url, $this->request->all()),
             };
         } catch (ConnectionException) {
-            return new Response('', Response::HTTP_GATEWAY_TIMEOUT);
+            return $this->stale($store, $staleKey, $cacheable)
+                ?? new Response('', Response::HTTP_GATEWAY_TIMEOUT);
+        }
+
+        if ($response->serverError() && ($stale = $this->stale($store, $staleKey, $cacheable))) {
+            return $stale;
         }
 
         $content = $response->body();
@@ -69,13 +76,25 @@ class FrontendProxyController
         }
 
         if ($cacheable && $response->successful()) {
-            $store->put($cacheKey, [
+            $cached = [
                 'content' => $content,
                 'content_type' => $contentType,
-            ], $config['cache_ttl']);
+            ];
+
+            $store->put($cacheKey, $cached, $config['cache_ttl']);
+            $store->put($staleKey, $cached, $config['cache_stale_ttl']);
         }
 
         return $this->response($content, $response->status(), $contentType, $cacheable ? 'miss' : null);
+    }
+
+    private function stale(Repository $store, string $key, bool $cacheable): ?Response
+    {
+        if (!$cacheable || !($stale = $store->get($key))) {
+            return null;
+        }
+
+        return $this->response($stale['content'], Response::HTTP_OK, $stale['content_type'], 'stale');
     }
 
     private function response(string $content, int $status, string $contentType, ?string $cache): Response

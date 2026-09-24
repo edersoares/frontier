@@ -361,3 +361,72 @@ test('proxy uses the configured timeouts', function () {
     expect($route->defaults['config']['timeout'])->toBe(10)
         ->and($route->defaults['config']['connect_timeout'])->toBe(3);
 });
+
+test('proxy serves the stale copy when the host answers a server error', function () {
+    Http::fake([
+        'frontier.test/*' => Http::sequence()
+            ->push('Fresh', 200, ['Content-Type' => 'application/javascript'])
+            ->push('Boom', 500),
+    ]);
+
+    $this->get('/with-cache')->assertOk();
+
+    $this->travel(61)->seconds();
+
+    $this->get('/with-cache')
+        ->assertOk()
+        ->assertContent('Fresh')
+        ->assertHeader('content-type', 'application/javascript')
+        ->assertHeader('x-frontier-cache', 'stale');
+
+    Http::assertSentCount(2);
+});
+
+test('proxy serves the stale copy when the host cannot be reached', function () {
+    $calls = 0;
+
+    Http::fake(function () use (&$calls) {
+        return ++$calls === 1
+            ? Http::response('Fresh')
+            : throw new ConnectionException('timeout');
+    });
+
+    $this->get('/with-cache')->assertOk();
+
+    $this->travel(61)->seconds();
+
+    $this->get('/with-cache')
+        ->assertOk()
+        ->assertContent('Fresh')
+        ->assertHeader('x-frontier-cache', 'stale');
+});
+
+test('proxy stale copy expires after its own ttl', function () {
+    Http::fake([
+        'frontier.test/*' => Http::sequence()
+            ->push('Fresh')
+            ->push('Boom', 500),
+    ]);
+
+    $this->get('/with-cache')->assertOk();
+
+    $this->travel(86401)->seconds();
+
+    $this->get('/with-cache')->assertStatus(500);
+});
+
+test('proxy does not fall back to the stale copy on client errors', function () {
+    Http::fake([
+        'frontier.test/*' => Http::sequence()
+            ->push('Fresh')
+            ->push('Gone', 404),
+    ]);
+
+    $this->get('/with-cache')->assertOk();
+
+    $this->travel(61)->seconds();
+
+    $this->get('/with-cache')
+        ->assertNotFound()
+        ->assertContent('Gone');
+});

@@ -53,6 +53,8 @@ return [
 
         'cache_ttl' => (int) env('FRONTIER_PROXY_CACHE_TTL', 60),
 
+        'cache_stale_ttl' => (int) env('FRONTIER_PROXY_CACHE_STALE_TTL', 86400),
+
     ],
 
     'proxy' => [
@@ -72,6 +74,8 @@ return [
         'cache_store' => env('FRONTIER_PROXY_CACHE_STORE'),
 
         'cache_ttl' => (int) env('FRONTIER_PROXY_CACHE_TTL', 60),
+
+        'cache_stale_ttl' => (int) env('FRONTIER_PROXY_CACHE_STALE_TTL', 86400),
 
     ],
 

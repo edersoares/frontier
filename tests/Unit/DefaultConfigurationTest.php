@@ -31,5 +31,7 @@ test('proxy cache uses the default store with a ttl of 60 seconds', function () 
     expect(config('frontier.proxy.cache_store'))->toBeNull()
         ->and(config('frontier.proxy.cache_ttl'))->toBe(60)
         ->and(config('frontier.frontier.cache_store'))->toBeNull()
-        ->and(config('frontier.frontier.cache_ttl'))->toBe(60);
+        ->and(config('frontier.frontier.cache_ttl'))->toBe(60)
+        ->and(config('frontier.proxy.cache_stale_ttl'))->toBe(86400)
+        ->and(config('frontier.frontier.cache_stale_ttl'))->toBe(86400);
 });
