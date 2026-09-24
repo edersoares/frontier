@@ -15,6 +15,12 @@ e entrega de valor isolada. A ordem abaixo é a ordem de execução, pois cada t
 
 Total estimado: 2 a 3 dias, incluindo docs e release.
 
+Tarefa extra, encontrada durante a implementação: uma regra com prefixo (`/new`) requisitava
+`host/new/new` ao abrir `/new`, porque o default do parâmetro `{uri?}` repetia o prefixo. Corrigido: o caminho
+pedido ao host espelha o do navegador, inclusive a barra final. De passagem, o `Request` passou a ser injetado no
+`__invoke` em vez do construtor, pois a instância do controller é reaproveitada pela rota e o request ficava preso
+ao primeiro pedido em processos de longa duração.
+
 Status em 24/09/2026: as seis tarefas foram implementadas na branch `proxy-improvements`, um commit por
 tarefa, com cobertura de testes em 100%. Resta abrir o PR, publicar a release e validar em staging do i-Educar.
 

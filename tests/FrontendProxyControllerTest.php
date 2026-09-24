@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 beforeEach(function () {
     config(['cache.default' => 'array']);
 
+    Http::preventStrayRequests();
+
     Frontier::add([
     'enabled' => true,
     'type' => 'proxy',
@@ -62,7 +64,7 @@ test('proxy exact route', function () {
 
 test('proxy all routes', function () {
     Http::fake([
-        'frontier.test/web/*' => Http::response('Frontier Favicon'),
+        'frontier.test/web*' => Http::response('Frontier Favicon'),
     ]);
 
     $this->get('/web')
@@ -73,6 +75,46 @@ test('proxy all routes', function () {
 
     $this->get('web/two')
         ->assertOk();
+});
+
+test('proxy all routes requests the host with the same path', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('OK'),
+    ]);
+
+    // The test client strips trailing slashes, so those go through the kernel directly
+    $this->get('/web')->assertOk();
+    $this->app->handle(HttpRequest::create('/web/'));
+    $this->get('/web/one')->assertOk();
+    $this->app->handle(HttpRequest::create('/web/one/'));
+
+    expect(Http::recorded()->map(fn (array $pair) => $pair[0]->url())->all())->toBe([
+        'frontier.test/web',
+        'frontier.test/web/',
+        'frontier.test/web/one',
+        'frontier.test/web/one/',
+    ]);
+});
+
+test('proxy root rule requests the host root', function () {
+    Frontier::add([
+        'enabled' => true,
+        'type' => 'proxy',
+        'host' => 'frontier.test/',
+        'rules' => ['/'],
+    ]);
+
+    Http::fake([
+        'frontier.test/*' => Http::response('OK'),
+    ]);
+
+    $this->get('/')->assertOk();
+    $this->get('/anything/else')->assertOk();
+
+    expect(Http::recorded()->map(fn (array $pair) => $pair[0]->url())->all())->toBe([
+        'frontier.test/',
+        'frontier.test/anything/else',
+    ]);
 });
 
 test('proxy exact and replace', function () {
@@ -90,7 +132,7 @@ test('proxy exact and replace', function () {
 
 test('proxy all routes and replace', function () {
     Http::fake([
-        'frontier.test/all/*' => Http::response('Frontier Replace'),
+        'frontier.test/all*' => Http::response('Frontier Replace'),
     ]);
 
     $this->get('/all')
@@ -108,7 +150,7 @@ test('proxy all routes and replace', function () {
 
 test('proxy and replace using base URL', function () {
     Http::fake([
-        'frontier.test/replace/*' => Http::response('Frontier is running in: /replace'),
+        'frontier.test/replace*' => Http::response('Frontier is running in: /replace'),
     ]);
 
     $this->get('/replace')
@@ -118,7 +160,7 @@ test('proxy and replace using base URL', function () {
 
 test('proxy all routes and rewrite', function () {
     Http::fake([
-        'frontier.test/url-rewrite/*' => Http::response('Frontier Rewrite URL'),
+        'frontier.test/url-rewrite*' => Http::response('Frontier Rewrite URL'),
     ]);
 
     $this->get('/rewrite')
@@ -130,7 +172,7 @@ test('proxy all routes and rewrite', function () {
 
 test('proxy POST request', function () {
     Http::fake([
-        'frontier.test/all-methods/*' => Http::response('OK'),
+        'frontier.test/all-methods*' => Http::response('OK'),
     ]);
 
     $this->post('/all-methods')
@@ -142,7 +184,7 @@ test('proxy POST request', function () {
 
 test('proxy HEAD request', function () {
     Http::fake([
-        'frontier.test/all-methods/*' => Http::response(),
+        'frontier.test/all-methods*' => Http::response(),
     ]);
 
     $this->head('/all-methods')
@@ -153,7 +195,7 @@ test('proxy HEAD request', function () {
 
 test('proxy PATCH request', function () {
     Http::fake([
-        'frontier.test/all-methods/*' => Http::response(),
+        'frontier.test/all-methods*' => Http::response(),
     ]);
 
     $this->patch('/all-methods')
@@ -164,7 +206,7 @@ test('proxy PATCH request', function () {
 
 test('proxy PUT request', function () {
     Http::fake([
-        'frontier.test/all-methods/*' => Http::response(),
+        'frontier.test/all-methods*' => Http::response(),
     ]);
 
     $this->put('/all-methods')
@@ -175,7 +217,7 @@ test('proxy PUT request', function () {
 
 test('proxy DELETE request', function () {
     Http::fake([
-        'frontier.test/all-methods/*' => Http::response('OK'),
+        'frontier.test/all-methods*' => Http::response('OK'),
     ]);
 
     $this->delete('/all-methods')

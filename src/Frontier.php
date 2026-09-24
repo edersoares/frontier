@@ -133,7 +133,7 @@ class Frontier
                 ->middleware($middleware)
                 ->where('uri', '.*')
                 ->setDefaults([
-                    'uri' => $proxyUri,
+                    'uri' => $proxyAll ? '' : $proxyUri,
                     'config' => [
                         'url' => $url,
                         'replaces' => $replaces,

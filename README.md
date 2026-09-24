@@ -68,6 +68,11 @@ optional segments separated by `::`.
 | `replace(search,replace)`   | Replace text in the response body, `replace` defaults to the proxied URL   |
 | `rewrite(search,replace)`   | Rewrite the URL requested from the host                                    |
 
+A rule without `exact` proxies the URI and everything under it. The path requested from the host mirrors the
+path requested by the browser, so with `FRONTIER_PROXY_HOST=https://cdn.test` and the rule `/new`, a request to
+`/new` fetches `https://cdn.test/new`, `/new/` fetches `https://cdn.test/new/` and `/new/about` fetches
+`https://cdn.test/new/about`.
+
 The status code returned by the host is forwarded to the client, so a `404` or `500` from your frontend server is
 seen as such by the browser. Failed responses are never cached.
 

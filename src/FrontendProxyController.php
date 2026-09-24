@@ -13,15 +13,11 @@ use Illuminate\Support\Facades\Http;
 
 class FrontendProxyController
 {
-    public function __construct(protected Request $request)
+    public function __invoke(Request $request, $uri, $config): Response
     {
-    }
-
-    public function __invoke($uri, $config): Response
-    {
-        $method = $this->request->getMethod();
-        $accept = $this->request->header('accept', '*/*');
-        $url = trim($config['url'], '/') . '/' . trim($uri, '/');
+        $method = $request->getMethod();
+        $accept = $request->header('accept', '*/*');
+        $url = $this->url($request, $config['url'], $uri);
 
         if ($config['rewrite']) {
             $url = str_replace(
@@ -31,7 +27,7 @@ class FrontendProxyController
             );
         }
 
-        $url = Frontier::resolveUrl($url, $this->request, $config);
+        $url = Frontier::resolveUrl($url, $request, $config);
 
         $cacheable = $method === 'GET' && $config['cache'];
         $cacheKey = 'frontier:proxy:' . sha1($url);
@@ -52,10 +48,10 @@ class FrontendProxyController
             $response = match ($method) {
                 'GET' => $http->get($url),
                 'HEAD' => $http->head($url),
-                'POST' => $http->post($url, $this->request->all()),
-                'PATCH' => $http->patch($url, $this->request->all()),
-                'PUT' => $http->put($url, $this->request->all()),
-                'DELETE' => $http->delete($url, $this->request->all()),
+                'POST' => $http->post($url, $request->all()),
+                'PATCH' => $http->patch($url, $request->all()),
+                'PUT' => $http->put($url, $request->all()),
+                'DELETE' => $http->delete($url, $request->all()),
             };
         } catch (ConnectionException) {
             return $this->stale($store, $staleKey, $cacheable)
@@ -88,6 +84,21 @@ class FrontendProxyController
         }
 
         return $this->response($content, $response->status(), $contentType, $cacheable ? 'miss' : null);
+    }
+
+    private function url(Request $request, string $base, string $uri): string
+    {
+        $url = trim($base, '/');
+
+        if ($path = trim($uri, '/')) {
+            $url .= '/' . $path;
+        }
+
+        if (str_ends_with($request->getPathInfo(), '/')) {
+            $url .= '/';
+        }
+
+        return $url;
     }
 
     private function stale(Repository $store, string $key, bool $cacheable): ?Response
