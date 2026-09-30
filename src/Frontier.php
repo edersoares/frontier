@@ -62,84 +62,19 @@ class Frontier
         $rules = $config['rules'] ?? [];
 
         foreach ($rules as $rule) {
-            $segments = explode('::', $rule);
+            $rule = ProxyRule::fromString($rule);
 
-            $url = $host;
-            $uri = $segments[0];
-            $methods = [];
-            $replaces = [];
-            $rewrite = [];
-            $middleware = [];
-            $cache = false;
-            $proxyAll = true;
-            $methods = ['GET'];
-
-            foreach ($segments as $segment) {
-                if ($segment === 'cache') {
-                    $cache = true;
-                }
-
-                if ($segment === 'exact') {
-                    $proxyAll = false;
-                }
-
-                if (str_starts_with($segment, 'methods(') && str_ends_with($segment, ')')) {
-                    $replace = substr($segment, 8, -1);
-
-                    $methods = explode(',', $replace . ',');
-                    $methods = array_filter($methods);
-                    $methods = array_map(fn ($method) => strtoupper($method), $methods);
-                }
-
-                if (str_starts_with($segment, 'middleware(') && str_ends_with($segment, ')')) {
-                    $replace = substr($segment, 11, -1);
-
-                    $middleware[] = $replace;
-                }
-
-                if (str_starts_with($segment, 'replace(') && str_ends_with($segment, ')')) {
-                    $replace = substr($segment, 8, -1);
-
-                    [$search, $replace] = explode(',', $replace . ',');
-
-                    if (empty($replace)) {
-                        $replace = $url . $search;
-                    }
-
-                    $replaces[$search] = $replace;
-                }
-
-                if (str_starts_with($segment, 'rewrite(') && str_ends_with($segment, ')')) {
-                    $replace = substr($segment, 8, -1);
-
-                    [$search, $replace] = explode(',', $replace . ',');
-
-                    $rewrite[$search] = $replace;
-                }
-            }
-
-            $proxyUri = $uri;
-
-            if ($proxyAll) {
-                $url .= $proxyUri;
-                $routeUri = $proxyUri . '/{uri?}';
-            } else {
-                $routeUri = $proxyUri;
-            }
-
-            $routeUri = str_replace('//', '/', $routeUri);
-
-            Route::match($methods, $routeUri, FrontendProxyController::class)
-                ->middleware($middleware)
+            Route::match($rule->methods, $rule->routeUri(), FrontendProxyController::class)
+                ->middleware($rule->middleware)
                 ->where('uri', '.*')
                 ->setDefaults([
-                    'uri' => $proxyAll ? '' : $proxyUri,
+                    'uri' => $rule->exact ? $rule->uri : '',
                     'config' => [
-                        'url' => $url,
-                        'replaces' => $replaces,
-                        'rewrite' => $rewrite,
-                        'methods' => $methods,
-                        'cache' => $cache,
+                        'url' => $rule->url($host),
+                        'replaces' => $rule->replaces($host),
+                        'rewrite' => $rule->rewrite,
+                        'methods' => $rule->methods,
+                        'cache' => $rule->cache,
                         'timeout' => (int) ($config['timeout'] ?? 5),
                         'connect_timeout' => (int) ($config['connect_timeout'] ?? 2),
                         'cache_store' => $config['cache_store'] ?? null,
