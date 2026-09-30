@@ -49,13 +49,18 @@ You can use 3 different types of frontend `http`, `proxy` or `view`.
 
 #### HTTP
 
+> **Deprecated.** The `http` type will be removed in 1.0. Use the `proxy` type with a `rewrite` and a
+> `replace` segment, as shown in the [Vite example](#vite-and-vuejs). Registering an `http` frontend
+> triggers an `E_USER_DEPRECATED` notice.
+
 Use in `FRONTIER_VIEW` the URL of your frontend server.
 
 #### Proxy
 
-Use in `FRONTIER_PROXY_HOST` or `FRONTIER_VIEW` the URL of your frontend server.
+Use in `FRONTIER_PROXY_HOST` the URL of your frontend server.
 
-> `FRONTIER_VIEW` will be removed in the future.
+> **Deprecated.** Falling back to `FRONTIER_VIEW` as the proxy host will be removed in 1.0. Set
+> `FRONTIER_PROXY_HOST`.
 
 `FRONTIER_PROXY_RULES` is a list of rules separated by `|`. Each rule starts with the URI to proxy, followed by
 optional segments separated by `::`.
@@ -106,8 +111,18 @@ Use in `FRONTIER_VIEW` the name of your view that you initialize your frontend, 
 
 #### Vite and Vue.js
 
-When using [Vite](https://vitejs.dev/) and [Vue.js](https://vuejs.org/) you can start your project with these
-environment variables using `http` approach.
+When using [Vite](https://vitejs.dev/) and [Vue.js](https://vuejs.org/) you can serve your app under `/vue` with
+these environment variables using the `proxy` approach. The `rewrite` segment strips `/vue` before requesting the
+dev server, so `/vue/about` fetches `http://localhost:5173/about`, and the `replace` segments point the assets in
+the HTML back to the dev server.
+
+```bash
+FRONTIER_DEFAULT_ENABLED=false
+FRONTIER_PROXY_HOST=http://localhost:5173
+FRONTIER_PROXY_RULES=/vue::rewrite(/vue)::replace(/@vite/client)::replace(/src/main.ts)::replace(/vite.svg)
+```
+
+The same setup with the deprecated `http` type:
 
 ```bash
 FRONTIER_ENDPOINT=/vue

@@ -6,6 +6,9 @@ namespace Dex\Laravel\Frontier;
 
 use Illuminate\Support\Facades\Http;
 
+/**
+ * @deprecated The `http` type will be removed in 1.0. Use the `proxy` type instead.
+ */
 class FrontendHttpController
 {
     public function __invoke($uri, $config): string

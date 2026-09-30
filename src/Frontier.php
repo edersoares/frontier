@@ -51,8 +51,16 @@ class Frontier
         self::add(config($key, []));
     }
 
+    /**
+     * @deprecated The `http` type will be removed in 1.0. Use the `proxy` type instead.
+     */
     private static function http(array $config): void
     {
+        trigger_error(
+            'The `http` Frontier type is deprecated and will be removed in 1.0. Use the `proxy` type instead.',
+            E_USER_DEPRECATED
+        );
+
         self::frontend($config);
     }
 

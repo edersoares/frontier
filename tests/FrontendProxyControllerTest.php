@@ -547,3 +547,30 @@ test('proxy caches each resolved url separately', function () {
 
     Http::assertSentCount(2);
 });
+
+test('proxy serves a vite app under a prefix using rewrite and replace', function () {
+    Frontier::add([
+        'enabled' => true,
+        'type' => 'proxy',
+        'host' => 'http://localhost:5173',
+        'rules' => [
+            '/vue::rewrite(/vue)::replace(/@vite/client)::replace(/src/main.ts)',
+        ],
+    ]);
+
+    Http::fake([
+        'localhost:5173/*' => Http::response('<script src="/@vite/client"></script><script src="/src/main.ts"></script>'),
+        'localhost:5173' => Http::response('<script src="/@vite/client"></script>'),
+    ]);
+
+    $this->get('/vue/about')
+        ->assertOk()
+        ->assertSee('src="http://localhost:5173/@vite/client"', false)
+        ->assertSee('src="http://localhost:5173/src/main.ts"', false);
+
+    Http::assertSent(fn (Request $request) => $request->url() === 'http://localhost:5173/about');
+
+    $this->get('/vue')->assertOk();
+
+    Http::assertSent(fn (Request $request) => $request->url() === 'http://localhost:5173');
+});
