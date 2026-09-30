@@ -6,6 +6,7 @@ namespace Dex\Laravel\Frontier;
 
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response as ClientResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
@@ -22,7 +23,6 @@ final class FrontendProxyController
     public function __invoke(Request $request, string $uri, array $config): Response
     {
         $method = $request->getMethod();
-        $accept = $request->header('accept', '*/*');
         $url = $this->url($request, $config['url'], $uri);
 
         if ($config['rewrite']) {
@@ -41,12 +41,10 @@ final class FrontendProxyController
         $store = Cache::store($config['cache_store']);
 
         if ($cacheable && ($cached = $store->get($cacheKey))) {
-            return $this->response($cached['content'], Response::HTTP_OK, $cached['content_type'], 'hit');
+            return $this->response($cached['content'], Response::HTTP_OK, $cached['headers'], 'hit');
         }
 
-        $http = Http::withHeaders([
-            'Accept' => $accept,
-        ])
+        $http = Http::withHeaders($this->requestHeaders($request, $config['request_headers']))
             ->timeout($config['timeout'])
             ->connectTimeout($config['connect_timeout']);
 
@@ -66,7 +64,7 @@ final class FrontendProxyController
         }
 
         $content = $response->body();
-        $contentType = $response->header('content-type');
+        $headers = $this->responseHeaders($response, $config['response_headers']);
 
         if ($config['replaces']) {
             $content = str_replace(
@@ -79,14 +77,14 @@ final class FrontendProxyController
         if ($cacheable && $response->successful()) {
             $cached = [
                 'content' => $content,
-                'content_type' => $contentType,
+                'headers' => $headers,
             ];
 
             $store->put($cacheKey, $cached, $config['cache_ttl']);
             $store->put($staleKey, $cached, $config['cache_stale_ttl']);
         }
 
-        return $this->response($content, $response->status(), $contentType, $cacheable ? 'miss' : null);
+        return $this->response($content, $response->status(), $headers, $cacheable ? 'miss' : null);
     }
 
     private function url(Request $request, string $base, string $uri): string
@@ -108,19 +106,60 @@ final class FrontendProxyController
         return $url;
     }
 
+    /**
+     * The headers of the incoming request that are sent to the host.
+     *
+     * @param array<int, string> $names
+     *
+     * @return array<string, string>
+     */
+    private function requestHeaders(Request $request, array $names): array
+    {
+        $headers = [];
+
+        foreach ($names as $name) {
+            if ($request->hasHeader($name)) {
+                $headers[$name] = $request->header($name);
+            }
+        }
+
+        return $headers;
+    }
+
+    /**
+     * The headers of the host response that are sent back to the client.
+     *
+     * @param array<int, string> $names
+     *
+     * @return array<string, string>
+     */
+    private function responseHeaders(ClientResponse $response, array $names): array
+    {
+        $headers = [];
+
+        foreach ($names as $name) {
+            if ($response->hasHeader($name)) {
+                $headers[$name] = $response->header($name);
+            }
+        }
+
+        return $headers;
+    }
+
     private function stale(Repository $store, string $key, bool $cacheable): ?Response
     {
         if (!$cacheable || !($stale = $store->get($key))) {
             return null;
         }
 
-        return $this->response($stale['content'], Response::HTTP_OK, $stale['content_type'], 'stale');
+        return $this->response($stale['content'], Response::HTTP_OK, $stale['headers'], 'stale');
     }
 
-    private function response(string $content, int $status, string $contentType, ?string $cache): Response
+    /**
+     * @param array<string, string> $headers
+     */
+    private function response(string $content, int $status, array $headers, ?string $cache): Response
     {
-        $headers = ['content-type' => $contentType];
-
         if ($cache) {
             $headers['x-frontier-cache'] = $cache;
         }

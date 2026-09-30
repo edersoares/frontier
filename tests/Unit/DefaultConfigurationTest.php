@@ -29,3 +29,9 @@ test('proxy cache uses the default store with a ttl of 60 seconds', function () 
         ->and(config('frontier.proxy.cache_stale_ttl'))->toBe(86400)
         ->and(config('frontier.frontier.cache_stale_ttl'))->toBe(86400);
 });
+
+test('proxy header lists default to the safe sets', function () {
+    expect(config('frontier.proxy.request_headers'))->toBe('accept,accept-language,user-agent')
+        ->and(config('frontier.proxy.response_headers'))->toBe('content-type,cache-control,etag,last-modified,content-disposition')
+        ->and(config('frontier.frontier.request_headers'))->toBe('accept,accept-language,user-agent');
+});

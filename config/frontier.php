@@ -19,6 +19,11 @@ $proxy = [
 
     'cache_stale_ttl' => (int) env('FRONTIER_PROXY_CACHE_STALE_TTL', 86400),
 
+    // Comma separated header names, see Frontier::REQUEST_HEADERS and Frontier::RESPONSE_HEADERS.
+    'request_headers' => env('FRONTIER_PROXY_REQUEST_HEADERS', implode(',', Dex\Laravel\Frontier\Frontier::REQUEST_HEADERS)),
+
+    'response_headers' => env('FRONTIER_PROXY_RESPONSE_HEADERS', implode(',', Dex\Laravel\Frontier\Frontier::RESPONSE_HEADERS)),
+
 ];
 
 return [

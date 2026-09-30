@@ -13,6 +13,16 @@ class Frontier
 {
     public const TYPES = ['http', 'proxy', 'view'];
 
+    /**
+     * Headers of the incoming request sent to the proxied host by default.
+     */
+    public const REQUEST_HEADERS = ['accept', 'accept-language', 'user-agent'];
+
+    /**
+     * Headers of the host response sent back to the client by default.
+     */
+    public const RESPONSE_HEADERS = ['content-type', 'cache-control', 'etag', 'last-modified', 'content-disposition'];
+
     protected static ?Closure $urlResolver = null;
 
     /**
@@ -133,9 +143,31 @@ class Frontier
                         'cache_store' => $config['cache_store'] ?? null,
                         'cache_ttl' => (int) ($config['cache_ttl'] ?? 60),
                         'cache_stale_ttl' => (int) ($config['cache_stale_ttl'] ?? 86400),
+                        'request_headers' => self::headers($config['request_headers'] ?? self::REQUEST_HEADERS),
+                        'response_headers' => self::headers($config['response_headers'] ?? self::RESPONSE_HEADERS),
                     ],
                 ]);
         }
+    }
+
+    /**
+     * Normalize a list of header names, given as an array or a comma separated string.
+     *
+     * @return array<int, string>
+     */
+    private static function headers(mixed $names): array
+    {
+        if (is_string($names)) {
+            $names = explode(',', $names);
+        }
+
+        if (!is_array($names)) {
+            throw new InvalidArgumentException('The proxy header lists must be arrays or comma separated strings.');
+        }
+
+        $names = array_map(fn (string $name) => strtolower(trim($name)), $names);
+
+        return array_values(array_filter($names));
     }
 
     /**

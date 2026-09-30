@@ -276,7 +276,7 @@ test('proxy and do cache', function () {
         ->assertHeader('x-frontier-cache', 'miss')
         ->assertSeeText($text);
 
-    expect(Cache::get(cacheKey()))->toBe(['content' => $text, 'content_type' => 'application/javascript']);
+    expect(Cache::get(cacheKey()))->toBe(['content' => $text, 'headers' => ['content-type' => 'application/javascript']]);
 
     $this->get('/with-cache')
         ->assertOk()
@@ -584,4 +584,81 @@ test('proxy serves a vite app under a prefix using rewrite and replace', functio
     $this->get('/vue')->assertOk();
 
     Http::assertSent(fn (Request $request) => $request->url() === 'http://localhost:5173');
+});
+
+test('proxy forwards only the listed request headers to the host', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('OK'),
+    ]);
+
+    $this->withHeaders([
+        'Accept' => 'text/html',
+        'Accept-Language' => 'pt-BR',
+        'Cookie' => 'session=secret',
+        'Authorization' => 'Bearer secret',
+    ])->get('/web')->assertOk();
+
+    Http::assertSent(fn (Request $request) => $request->hasHeader('accept', 'text/html')
+        && $request->hasHeader('accept-language', 'pt-BR')
+        && !$request->hasHeader('cookie')
+        && !$request->hasHeader('authorization'));
+});
+
+test('proxy forwards only the listed response headers to the client', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('OK', 200, [
+            'Content-Type' => 'application/javascript',
+            'Cache-Control' => 'public, max-age=3600',
+            'ETag' => '"abc"',
+            'Set-Cookie' => 'upstream=1',
+            'X-Powered-By' => 'host',
+        ]),
+    ]);
+
+    $this->get('/web')
+        ->assertOk()
+        ->assertHeader('content-type', 'application/javascript')
+        ->assertHeader('cache-control', 'max-age=3600, public')
+        ->assertHeader('etag', '"abc"')
+        ->assertHeaderMissing('set-cookie')
+        ->assertHeaderMissing('x-powered-by');
+});
+
+test('proxy header lists are configurable', function () {
+    Frontier::add([
+        'enabled' => true,
+        'type' => 'proxy',
+        'host' => 'headers.test',
+        'rules' => ['/headers'],
+        'request_headers' => 'Cookie, X-Tenant',
+        'response_headers' => ['set-cookie'],
+    ]);
+
+    Http::fake([
+        'headers.test/*' => Http::response('OK', 200, ['Set-Cookie' => 'upstream=1', 'Content-Type' => 'text/plain']),
+    ]);
+
+    $response = $this->withHeaders(['Cookie' => 'session=1', 'X-Tenant' => 'acme', 'Accept' => 'text/html'])
+        ->get('/headers')
+        ->assertOk()
+        ->assertHeader('content-type', 'text/html; charset=UTF-8');
+
+    expect($response->headers->get('set-cookie'))->toStartWith('upstream=1');
+
+    Http::assertSent(fn (Request $request) => $request->hasHeader('cookie', 'session=1')
+        && $request->hasHeader('x-tenant', 'acme')
+        && !$request->hasHeader('accept'));
+});
+
+test('proxy cached responses keep the forwarded headers', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('OK', 200, ['Content-Type' => 'application/javascript', 'ETag' => '"v1"']),
+    ]);
+
+    $this->get('/with-cache')->assertHeader('x-frontier-cache', 'miss');
+
+    $this->get('/with-cache')
+        ->assertHeader('x-frontier-cache', 'hit')
+        ->assertHeader('content-type', 'application/javascript')
+        ->assertHeader('etag', '"v1"');
 });
