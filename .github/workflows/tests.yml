@@ -31,6 +31,9 @@ jobs:
     - name: Run Pint
       run: vendor/bin/pint --test
 
+    - name: Run PHPStan
+      run: composer analyse -- --no-progress
+
   tests:
 
     name: Tests (PHP ${{ matrix.php }}, Laravel ${{ matrix.laravel }})
