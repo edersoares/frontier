@@ -35,3 +35,8 @@ test('proxy header lists default to the safe sets', function () {
         ->and(config('frontier.proxy.response_headers'))->toBe('content-type,cache-control,etag,last-modified,content-disposition')
         ->and(config('frontier.frontier.request_headers'))->toBe('accept,accept-language,user-agent');
 });
+
+test('proxy cache stores responses up to 1 MB by default', function () {
+    expect(config('frontier.proxy.cache_max_size'))->toBe(1048576)
+        ->and(config('frontier.frontier.cache_max_size'))->toBe(1048576);
+});
