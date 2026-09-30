@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- `FRONTIER_PROXY_REQUEST_HEADERS` and `FRONTIER_PROXY_RESPONSE_HEADERS` define which headers the proxy forwards in each direction. Defaults: `accept,accept-language,user-agent` to the host and `content-type,cache-control,etag,last-modified,content-disposition` back to the client. Before, only `Accept` went to the host and only `Content-Type` came back.
+
 - `Frontier::add()` validates the config and throws `InvalidArgumentException` for an unknown `type`, a missing `endpoint` or `view`, or a proxy without `host`. Proxy rules with an unknown segment or without a URI throw as well instead of being silently ignored.
 - `Frontier::flush()` forgets the URL resolver, handy in tests and long-running workers.
 - The proxy accepts `OPTIONS` requests when listed in `methods(...)`.

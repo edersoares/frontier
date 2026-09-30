@@ -42,6 +42,8 @@ You can configure your frontend using some environment variables described below
 | `FRONTIER_PROXY_CACHE_STORE`      | Cache store used by the `cache` rule segment, default store when empty |                           |
 | `FRONTIER_PROXY_CACHE_TTL`        | Seconds a cached proxy response stays fresh                            | `60`                      |
 | `FRONTIER_PROXY_CACHE_STALE_TTL`  | Seconds the last good response is kept to serve when the host fails    | `86400`                   |
+| `FRONTIER_PROXY_REQUEST_HEADERS`  | Request headers sent to the host, comma separated                      | `accept,accept-language,user-agent` |
+| `FRONTIER_PROXY_RESPONSE_HEADERS` | Host response headers sent back to the client, comma separated         | `content-type,cache-control,etag,last-modified,content-disposition` |
 
 ### Frontend types
 
@@ -87,6 +89,16 @@ seen as such by the browser. Failed responses are never cached.
 
 When the host cannot be reached within `FRONTIER_PROXY_CONNECT_TIMEOUT` or does not answer within
 `FRONTIER_PROXY_TIMEOUT`, the proxy responds with `504 Gateway Timeout` instead of holding the PHP worker.
+
+##### Headers
+
+Only the headers listed in `FRONTIER_PROXY_REQUEST_HEADERS` are sent to the host, and only the headers listed in
+`FRONTIER_PROXY_RESPONSE_HEADERS` are sent back to the client. Everything else is dropped in both directions,
+so by default cookies and `Authorization` never reach the host and `Set-Cookie` never reaches the browser.
+Extend the lists when the host needs them, for example `FRONTIER_PROXY_REQUEST_HEADERS=accept,cookie` to
+forward the session cookie to an API.
+
+Redirects from the host are followed by the proxy, so the client always receives the final response.
 
 ##### Cache
 
