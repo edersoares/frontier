@@ -98,6 +98,9 @@ so by default cookies and `Authorization` never reach the host and `Set-Cookie` 
 Extend the lists when the host needs them, for example `FRONTIER_PROXY_REQUEST_HEADERS=accept,cookie` to
 forward the session cookie to an API.
 
+The body of `POST`, `PUT`, `PATCH` and `DELETE` requests is sent to the host as received, with its original
+`Content-Type`, so JSON stays JSON and forms stay forms.
+
 Redirects from the host are followed by the proxy, so the client always receives the final response.
 
 ##### Cache

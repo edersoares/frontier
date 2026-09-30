@@ -662,3 +662,55 @@ test('proxy cached responses keep the forwarded headers', function () {
         ->assertHeader('content-type', 'application/javascript')
         ->assertHeader('etag', '"v1"');
 });
+
+test('proxy forwards a json body as received', function () {
+    Http::fake([
+        'frontier.test/all-methods*' => Http::response('OK'),
+    ]);
+
+    $json = '{"name":"Frontier","tags":["a","b"],"nested":{"deep":true}}';
+
+    $this->call('POST', '/all-methods', [], [], [], ['CONTENT_TYPE' => 'application/json'], $json)
+        ->assertOk();
+
+    Http::assertSent(fn (Request $request) => $request->method() === 'POST'
+        && $request->body() === $json
+        && $request->hasHeader('Content-Type', 'application/json'));
+});
+
+test('proxy forwards a form body as received', function () {
+    Http::fake([
+        'frontier.test/all-methods*' => Http::response('OK'),
+    ]);
+
+    $form = 'name=Frontier&tags%5B%5D=a&tags%5B%5D=b';
+
+    $this->call('PUT', '/all-methods', [], [], [], ['CONTENT_TYPE' => 'application/x-www-form-urlencoded'], $form)
+        ->assertOk();
+
+    Http::assertSent(fn (Request $request) => $request->method() === 'PUT'
+        && $request->body() === $form
+        && $request->hasHeader('Content-Type', 'application/x-www-form-urlencoded'));
+});
+
+test('proxy sends parsed input as json when there is no raw body', function () {
+    Http::fake([
+        'frontier.test/all-methods*' => Http::response('OK'),
+    ]);
+
+    $this->post('/all-methods', ['name' => 'Frontier'])->assertOk();
+
+    Http::assertSent(fn (Request $request) => $request->method() === 'POST'
+        && $request->body() === '{"name":"Frontier"}'
+        && $request->hasHeader('Content-Type', 'application/json'));
+});
+
+test('proxy does not send a body with GET', function () {
+    Http::fake([
+        'frontier.test/*' => Http::response('OK'),
+    ]);
+
+    $this->get('/web')->assertOk();
+
+    Http::assertSent(fn (Request $request) => $request->body() === '');
+});
