@@ -1,0 +1,37 @@
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased]
+
+### Added
+
+- The `proxy` type forwards the status code returned by the host, so a `404` or `500` from the frontend server is seen as such by the browser.
+- `FRONTIER_PROXY_TIMEOUT` and `FRONTIER_PROXY_CONNECT_TIMEOUT` define explicit timeouts for the proxied request. When the host cannot be reached the proxy answers `504 Gateway Timeout`.
+- Rules with the `cache` segment store successful `GET` responses in the Laravel cache, configured by `FRONTIER_PROXY_CACHE_STORE` and `FRONTIER_PROXY_CACHE_TTL`. Responses carry an `X-Frontier-Cache` header with `hit`, `miss` or `stale`.
+- The last good response is kept for `FRONTIER_PROXY_CACHE_STALE_TTL` seconds and served when the host answers a `5xx` or cannot be reached.
+- `Frontier::resolveUrlUsing()` registers a callback to resolve the proxied URL per request.
+- The query string is forwarded to the proxied host.
+
+### Changed
+
+- The `proxy` type no longer answers `200` for every response from the host.
+- The `proxy` type no longer caches responses in files under `storage/framework/views`. The `http` type keeps the file cache.
+- The path requested from the host mirrors the path requested by the browser, including the trailing slash.
+
+### Fixed
+
+- The `cache` and `methods(...)` segments are applied regardless of their position in the rule.
+
+### Removed
+
+- The `FRONTIER_PROXY` environment variable was removed from the documentation. It was not read by the package.
+
+## [0.18.0] - 2026-08-24
+
+See the [release notes](https://github.com/edersoares/frontier/releases/tag/0.18.0).
+
+[Unreleased]: https://github.com/edersoares/frontier/compare/0.18.0...HEAD
+[0.18.0]: https://github.com/edersoares/frontier/releases/tag/0.18.0

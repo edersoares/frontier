@@ -33,7 +33,6 @@ You can configure your frontend using some environment variables described below
 | `FRONTIER_VIEWS_PATH`             | Directory where all the `views` are                                    | `frontier/resources/html` |
 | `FRONTIER_FIND`                   | Content that will be replaced                                          |                           |
 | `FRONTIER_REPLACE_WITH`           | Content that will be the replacement                                   |                           |
-| `FRONTIER_PROXY`                  | URIs that you will do proxy                                            |                           |
 | `FRONTIER_CACHE`                  | When `http` type, indicates if the response will be cached             | `true`                    |
 | `FRONTIER_PROXY_ENABLED`          | Enables the default `proxy` frontend                                   | `true`                    |
 | `FRONTIER_PROXY_HOST`             | `url` of the assets server                                             |                           |
@@ -116,7 +115,6 @@ FRONTIER_TYPE=http
 FRONTIER_VIEW=http://localhost:5173/
 FRONTIER_FIND=/@vite/client,/src/main.ts,/vite.svg
 FRONTIER_REPLACE_WITH=http://localhost:5173/@vite/client,http://localhost:5173/src/main.ts,http://localhost:5173/vite.svg
-FRONTIER_PROXY=/vite.svg
 FRONTIER_CACHE=false
 ```
 
