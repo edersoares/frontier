@@ -95,7 +95,7 @@ class Frontier
             E_USER_DEPRECATED
         );
 
-        self::frontend($config);
+        self::frontend(FrontendHttpController::class, $config);
     }
 
     /**
@@ -143,13 +143,14 @@ class Frontier
      */
     private static function view(array $config): void
     {
-        self::frontend($config);
+        self::frontend(FrontendViewController::class, $config);
     }
 
     /**
+     * @param class-string $controller
      * @param array<string, mixed> $config
      */
-    private static function frontend(array $config): void
+    private static function frontend(string $controller, array $config): void
     {
         foreach (['endpoint', 'view'] as $key) {
             if (!is_string($config[$key] ?? null) || $config[$key] === '') {
@@ -160,11 +161,6 @@ class Frontier
                 ));
             }
         }
-
-        $controller = match ($config['type']) {
-            'http' => FrontendHttpController::class,
-            'view' => FrontendViewController::class,
-        };
 
         Route::get($config['endpoint'] . '/{uri?}', $controller)
             ->middleware($config['middleware'] ?? [])

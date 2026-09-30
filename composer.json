@@ -21,7 +21,8 @@
     "require-dev": {
         "laravel/pint": "^1.10",
         "orchestra/testbench": "^8.5|^9|^10|^11",
-        "pestphp/pest": "^2.6|^3|^4"
+        "pestphp/pest": "^2.6|^3|^4",
+        "phpstan/phpstan": "^2"
     },
     "autoload": {
         "psr-4": {
@@ -51,6 +52,7 @@
     },
     "scripts": {
         "coverage": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",
+        "analyse": "vendor/bin/phpstan analyse",
         "test": "vendor/bin/pest",
         "post-autoload-dump": [
             "@clear",
@@ -70,6 +72,7 @@
     },
     "scripts-descriptions": {
         "coverage": "Run code coverage",
-        "test": "Run tests"
+        "test": "Run tests",
+        "analyse": "Run static analysis"
     }
 }
