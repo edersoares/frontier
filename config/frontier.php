@@ -2,6 +2,25 @@
 
 declare(strict_types=1);
 
+// Settings shared by every frontend of type `proxy`.
+$proxy = [
+
+    'host' => env('FRONTIER_PROXY_HOST', ''),
+
+    'rules' => array_filter(explode('|', env('FRONTIER_PROXY_RULES', ''))),
+
+    'timeout' => (int) env('FRONTIER_PROXY_TIMEOUT', 5),
+
+    'connect_timeout' => (int) env('FRONTIER_PROXY_CONNECT_TIMEOUT', 2),
+
+    'cache_store' => env('FRONTIER_PROXY_CACHE_STORE'),
+
+    'cache_ttl' => (int) env('FRONTIER_PROXY_CACHE_TTL', 60),
+
+    'cache_stale_ttl' => (int) env('FRONTIER_PROXY_CACHE_STALE_TTL', 86400),
+
+];
+
 return [
 
     'frontier' => [
@@ -41,19 +60,7 @@ return [
             'Accept' => 'text/html',
         ],
 
-        'host' => env('FRONTIER_PROXY_HOST', ''),
-
-        'rules' => array_filter(explode('|', env('FRONTIER_PROXY_RULES', ''))),
-
-        'timeout' => (int) env('FRONTIER_PROXY_TIMEOUT', 5),
-
-        'connect_timeout' => (int) env('FRONTIER_PROXY_CONNECT_TIMEOUT', 2),
-
-        'cache_store' => env('FRONTIER_PROXY_CACHE_STORE'),
-
-        'cache_ttl' => (int) env('FRONTIER_PROXY_CACHE_TTL', 60),
-
-        'cache_stale_ttl' => (int) env('FRONTIER_PROXY_CACHE_STALE_TTL', 86400),
+        ...$proxy,
 
     ],
 
@@ -63,19 +70,10 @@ return [
 
         'type' => 'proxy',
 
+        ...$proxy,
+
+        // Falling back to FRONTIER_VIEW is deprecated and will be removed.
         'host' => env('FRONTIER_PROXY_HOST', env('FRONTIER_VIEW', '')),
-
-        'rules' => array_filter(explode('|', env('FRONTIER_PROXY_RULES', ''))),
-
-        'timeout' => (int) env('FRONTIER_PROXY_TIMEOUT', 5),
-
-        'connect_timeout' => (int) env('FRONTIER_PROXY_CONNECT_TIMEOUT', 2),
-
-        'cache_store' => env('FRONTIER_PROXY_CACHE_STORE'),
-
-        'cache_ttl' => (int) env('FRONTIER_PROXY_CACHE_TTL', 60),
-
-        'cache_stale_ttl' => (int) env('FRONTIER_PROXY_CACHE_STALE_TTL', 86400),
 
     ],
 
