@@ -88,9 +88,6 @@ test('segments are parsed regardless of their order', function () {
         ->and($rule->middleware)->toBe(['auth']);
 });
 
-test('a segment that only looks like a function is ignored', function () {
-    $rule = ProxyRule::fromString('/new::methods(get::cache(');
-
-    expect($rule->methods)->toBe(['GET'])
-        ->and($rule->cache)->toBeFalse();
-});
+test('a segment that only looks like a function throws', function () {
+    ProxyRule::fromString('/new::methods(get');
+})->throws(InvalidArgumentException::class, 'Unknown segment [methods(get]');

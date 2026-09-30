@@ -37,7 +37,7 @@ beforeEach(function () {
 ]);
 });
 
-afterEach(fn () => Frontier::resolveUrlUsing(null));
+afterEach(fn () => Frontier::flush());
 
 function cacheKey(): string
 {
@@ -206,6 +206,17 @@ test('proxy POST request', function () {
         ->assertOk();
 
     Http::assertSent(fn (Request $request) => $request->method() === 'POST');
+});
+
+test('proxy OPTIONS request', function () {
+    Http::fake([
+        'frontier.test/all-methods*' => Http::response('', 204),
+    ]);
+
+    $this->options('/all-methods')
+        ->assertNoContent();
+
+    Http::assertSent(fn (Request $request) => $request->method() === 'OPTIONS');
 });
 
 test('proxy HEAD request', function () {

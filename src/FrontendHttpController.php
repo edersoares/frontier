@@ -7,11 +7,16 @@ namespace Dex\Laravel\Frontier;
 use Illuminate\Support\Facades\Http;
 
 /**
+ * @internal
+ *
  * @deprecated The `http` type will be removed in 1.0. Use the `proxy` type instead.
  */
-class FrontendHttpController
+final class FrontendHttpController
 {
-    public function __invoke($uri, $config): string
+    /**
+     * @param array<string, mixed> $config
+     */
+    public function __invoke(string $uri, array $config): string
     {
         $endpoint = trim($config['endpoint'], '/');
         $path = storage_path("framework/views/frontier-$endpoint.html");

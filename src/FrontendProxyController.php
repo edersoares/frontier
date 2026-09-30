@@ -11,9 +11,15 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
-class FrontendProxyController
+/**
+ * @internal
+ */
+final class FrontendProxyController
 {
-    public function __invoke(Request $request, $uri, $config): Response
+    /**
+     * @param array<string, mixed> $config
+     */
+    public function __invoke(Request $request, string $uri, array $config): Response
     {
         $method = $request->getMethod();
         $accept = $request->header('accept', '*/*');
@@ -44,15 +50,12 @@ class FrontendProxyController
             ->timeout($config['timeout'])
             ->connectTimeout($config['connect_timeout']);
 
+        $options = in_array($method, ['GET', 'HEAD', 'OPTIONS'], true)
+            ? []
+            : ['json' => $request->all()];
+
         try {
-            $response = match ($method) {
-                'GET' => $http->get($url),
-                'HEAD' => $http->head($url),
-                'POST' => $http->post($url, $request->all()),
-                'PATCH' => $http->patch($url, $request->all()),
-                'PUT' => $http->put($url, $request->all()),
-                'DELETE' => $http->delete($url, $request->all()),
-            };
+            $response = $http->send($method, $url, $options);
         } catch (ConnectionException) {
             return $this->stale($store, $staleKey, $cacheable)
                 ?? new Response('', Response::HTTP_GATEWAY_TIMEOUT);

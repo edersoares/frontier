@@ -6,14 +6,20 @@ namespace Dex\Laravel\Frontier;
 
 use Illuminate\Contracts\View\Factory as View;
 
-class FrontendViewController
+/**
+ * @internal
+ */
+final class FrontendViewController
 {
     public function __construct(
         private View $view
     ) {
     }
 
-    public function __invoke($uri, $config): string
+    /**
+     * @param array<string, mixed> $config
+     */
+    public function __invoke(string $uri, array $config): string
     {
         $content = $this->view->make($config['view'])->render();
 
