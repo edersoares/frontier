@@ -52,3 +52,27 @@ test('`http` controller', function () {
     // Remove cache
     $this->artisan('view:clear');
 });
+
+test('`http` controller triggers a deprecation when registered', function () {
+    $deprecation = null;
+
+    set_error_handler(function (int $level, string $message) use (&$deprecation) {
+        $deprecation = $message;
+
+        return true;
+    }, E_USER_DEPRECATED);
+
+    try {
+        Frontier::add([
+            'enabled' => true,
+            'type' => 'http',
+            'endpoint' => 'deprecated',
+            'view' => 'http://frontier.test',
+            'cache' => false,
+        ]);
+    } finally {
+        restore_error_handler();
+    }
+
+    expect($deprecation)->toContain('`http` Frontier type is deprecated');
+});

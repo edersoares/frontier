@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Deprecated
+
+- The `http` type. Registering an `http` frontend triggers an `E_USER_DEPRECATED` notice. Use the `proxy` type with `rewrite` and `replace` segments instead; the README shows the Vite example migrated.
+- Falling back to `FRONTIER_VIEW` as the proxy host. Set `FRONTIER_PROXY_HOST`.
+
 ### Added
 
 - The `proxy` type forwards the status code returned by the host, so a `404` or `500` from the frontend server is seen as such by the browser.

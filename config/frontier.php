@@ -72,7 +72,7 @@ return [
 
         ...$proxy,
 
-        // Falling back to FRONTIER_VIEW is deprecated and will be removed.
+        // Deprecated: the fallback to FRONTIER_VIEW will be removed in 1.0. Use FRONTIER_PROXY_HOST.
         'host' => env('FRONTIER_PROXY_HOST', env('FRONTIER_VIEW', '')),
 
     ],
