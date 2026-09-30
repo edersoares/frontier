@@ -73,17 +73,23 @@ final class FrontendProxyController
             );
         }
 
-        if ($cacheable && $response->successful()) {
-            $cached = [
-                'content' => $content,
-                'headers' => $headers,
-            ];
+        $cache = $cacheable ? 'miss' : null;
 
-            $store->put($cacheKey, $cached, $config['cache_ttl']);
-            $store->put($staleKey, $cached, $config['cache_stale_ttl']);
+        if ($cacheable && $response->successful()) {
+            if (strlen($content) > $config['cache_max_size']) {
+                $cache = 'skip';
+            } else {
+                $cached = [
+                    'content' => $content,
+                    'headers' => $headers,
+                ];
+
+                $store->put($cacheKey, $cached, $config['cache_ttl']);
+                $store->put($staleKey, $cached, $config['cache_stale_ttl']);
+            }
         }
 
-        return $this->response($content, $response->status(), $headers, $cacheable ? 'miss' : null);
+        return $this->response($content, $response->status(), $headers, $cache);
     }
 
     private function url(Request $request, string $base, string $uri): string

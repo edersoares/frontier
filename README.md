@@ -42,6 +42,7 @@ You can configure your frontend using some environment variables described below
 | `FRONTIER_PROXY_CACHE_STORE`      | Cache store used by the `cache` rule segment, default store when empty |                           |
 | `FRONTIER_PROXY_CACHE_TTL`        | Seconds a cached proxy response stays fresh                            | `60`                      |
 | `FRONTIER_PROXY_CACHE_STALE_TTL`  | Seconds the last good response is kept to serve when the host fails    | `86400`                   |
+| `FRONTIER_PROXY_CACHE_MAX_SIZE`   | Largest response body, in bytes, stored in the cache                   | `1048576`                 |
 | `FRONTIER_PROXY_REQUEST_HEADERS`  | Request headers sent to the host, comma separated                      | `accept,accept-language,user-agent` |
 | `FRONTIER_PROXY_RESPONSE_HEADERS` | Host response headers sent back to the client, comma separated         | `content-type,cache-control,etag,last-modified,content-disposition` |
 
@@ -114,7 +115,12 @@ Every successful response is also kept as a stale copy for `FRONTIER_PROXY_CACHE
 fresh copy has expired and the host answers a `5xx` or cannot be reached, the stale copy is served with status
 `200` so the frontend keeps working while the host is down. Client errors such as `404` are forwarded as is.
 
-Responses carry an `X-Frontier-Cache` header with `hit`, `miss` or `stale`, which is handy to check with `curl -I`.
+Responses larger than `FRONTIER_PROXY_CACHE_MAX_SIZE` bytes are served but not stored, so a `cache` rule on a
+directory of assets does not fill the store with large bundles or fonts. Raise the limit when the host serves
+big files that are worth caching.
+
+Responses carry an `X-Frontier-Cache` header with `hit`, `miss`, `stale` or `skip` (too large to store), which
+is handy to check with `curl -I`.
 To invalidate everything at once run `php artisan cache:clear`, or point `FRONTIER_PROXY_CACHE_STORE` to a
 dedicated store so it can be flushed without touching the rest of the application cache.
 

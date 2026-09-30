@@ -714,3 +714,27 @@ test('proxy does not send a body with GET', function () {
 
     Http::assertSent(fn (Request $request) => $request->body() === '');
 });
+
+test('proxy does not cache responses larger than the limit', function () {
+    Frontier::add([
+        'enabled' => true,
+        'type' => 'proxy',
+        'host' => 'limit.test',
+        'rules' => ['/limited::cache'],
+        'cache_max_size' => 10,
+    ]);
+
+    Http::fake([
+        'limit.test/limited/small' => Http::response('0123456789'),
+        'limit.test/limited/large' => Http::response('0123456789A'),
+    ]);
+
+    $this->get('/limited/small')->assertHeader('x-frontier-cache', 'miss');
+    $this->get('/limited/small')->assertHeader('x-frontier-cache', 'hit');
+
+    $this->get('/limited/large')->assertOk()->assertHeader('x-frontier-cache', 'skip');
+    $this->get('/limited/large')->assertOk()->assertHeader('x-frontier-cache', 'skip');
+
+    expect(Cache::get('frontier:proxy:' . sha1('limit.test/limited/large')))->toBeNull()
+        ->and(Cache::get('frontier:proxy:stale:' . sha1('limit.test/limited/large')))->toBeNull();
+});

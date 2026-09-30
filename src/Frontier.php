@@ -143,6 +143,7 @@ class Frontier
                         'cache_store' => $config['cache_store'] ?? null,
                         'cache_ttl' => (int) ($config['cache_ttl'] ?? 60),
                         'cache_stale_ttl' => (int) ($config['cache_stale_ttl'] ?? 86400),
+                        'cache_max_size' => (int) ($config['cache_max_size'] ?? 1048576),
                         'request_headers' => self::headers($config['request_headers'] ?? self::REQUEST_HEADERS),
                         'response_headers' => self::headers($config['response_headers'] ?? self::RESPONSE_HEADERS),
                     ],
