@@ -11,6 +11,8 @@ use InvalidArgumentException;
 
 class Frontier
 {
+    public const TYPES = ['http', 'proxy', 'view'];
+
     protected static ?Closure $urlResolver = null;
 
     /**
@@ -24,6 +26,11 @@ class Frontier
         static::$urlResolver = $resolver;
     }
 
+    /**
+     * @internal
+     *
+     * @param array<string, mixed> $config
+     */
     public static function resolveUrl(string $url, Request $request, array $config): string
     {
         if (static::$urlResolver === null) {
@@ -33,13 +40,38 @@ class Frontier
         return (static::$urlResolver)($url, $request, $config);
     }
 
+    /**
+     * Forget everything registered at runtime, such as the URL resolver.
+     */
+    public static function flush(): void
+    {
+        static::$urlResolver = null;
+    }
+
+    /**
+     * Register the routes of a frontend.
+     *
+     * @param array<string, mixed> $config
+     *
+     * @throws InvalidArgumentException when the config is invalid
+     */
     public static function add(array $config): void
     {
         if (empty($config['enabled'])) {
             return;
         }
 
-        match ($config['type']) {
+        $type = $config['type'] ?? null;
+
+        if (!is_string($type) || !in_array($type, self::TYPES, true)) {
+            throw new InvalidArgumentException(sprintf(
+                'Unknown Frontier type [%s]. Expected one of: %s.',
+                is_scalar($type) ? $type : gettype($type),
+                implode(', ', self::TYPES)
+            ));
+        }
+
+        match ($type) {
             'http' => self::http($config),
             'proxy' => self::proxy($config),
             'view' => self::view($config),
@@ -53,6 +85,8 @@ class Frontier
 
     /**
      * @deprecated The `http` type will be removed in 1.0. Use the `proxy` type instead.
+     *
+     * @param array<string, mixed> $config
      */
     private static function http(array $config): void
     {
@@ -64,10 +98,21 @@ class Frontier
         self::frontend($config);
     }
 
+    /**
+     * @param array<string, mixed> $config
+     */
     private static function proxy(array $config): void
     {
         $host = $config['host'] ?? '';
         $rules = $config['rules'] ?? [];
+
+        if (!is_array($rules)) {
+            throw new InvalidArgumentException('The proxy `rules` must be an array of rule strings.');
+        }
+
+        if ($rules !== [] && (!is_string($host) || $host === '')) {
+            throw new InvalidArgumentException('The proxy `host` is required when there are rules.');
+        }
 
         foreach ($rules as $rule) {
             $rule = ProxyRule::fromString($rule);
@@ -93,17 +138,32 @@ class Frontier
         }
     }
 
+    /**
+     * @param array<string, mixed> $config
+     */
     private static function view(array $config): void
     {
         self::frontend($config);
     }
 
-    private static function frontend($config): void
+    /**
+     * @param array<string, mixed> $config
+     */
+    private static function frontend(array $config): void
     {
+        foreach (['endpoint', 'view'] as $key) {
+            if (!is_string($config[$key] ?? null) || $config[$key] === '') {
+                throw new InvalidArgumentException(sprintf(
+                    'The `%s` of a `%s` frontend is required.',
+                    $key,
+                    $config['type']
+                ));
+            }
+        }
+
         $controller = match ($config['type']) {
             'http' => FrontendHttpController::class,
             'view' => FrontendViewController::class,
-            default => throw new InvalidArgumentException('Unknown controller type'), // @codeCoverageIgnore
         };
 
         Route::get($config['endpoint'] . '/{uri?}', $controller)

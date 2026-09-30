@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- `Frontier::add()` validates the config and throws `InvalidArgumentException` for an unknown `type`, a missing `endpoint` or `view`, or a proxy without `host`. Proxy rules with an unknown segment or without a URI throw as well instead of being silently ignored.
+- `Frontier::flush()` forgets the URL resolver, handy in tests and long-running workers.
+- The proxy accepts `OPTIONS` requests when listed in `methods(...)`.
+
 - The `proxy` type forwards the status code returned by the host, so a `404` or `500` from the frontend server is seen as such by the browser.
 - `FRONTIER_PROXY_TIMEOUT` and `FRONTIER_PROXY_CONNECT_TIMEOUT` define explicit timeouts for the proxied request. When the host cannot be reached the proxy answers `504 Gateway Timeout`.
 - Rules with the `cache` segment store successful `GET` responses in the Laravel cache, configured by `FRONTIER_PROXY_CACHE_STORE` and `FRONTIER_PROXY_CACHE_TTL`. Responses carry an `X-Frontier-Cache` header with `hit`, `miss` or `stale`.
@@ -21,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The query string is forwarded to the proxied host.
 
 ### Changed
+
+- The controllers are `final` and marked `@internal`. The public API is `Frontier::add()`, `Frontier::addFromConfig()`, `Frontier::resolveUrlUsing()`, `Frontier::flush()`, the config keys, the environment variables and the rule syntax.
 
 - The `proxy` type no longer answers `200` for every response from the host.
 - The `proxy` type no longer caches responses in files under `storage/framework/views`. The `http` type keeps the file cache.

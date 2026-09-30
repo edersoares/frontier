@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dex\Laravel\Frontier;
 
+use InvalidArgumentException;
+
 /**
  * A single proxy rule parsed from FRONTIER_PROXY_RULES.
  *
@@ -29,10 +31,17 @@ final class ProxyRule
     ) {
     }
 
+    /**
+     * @throws InvalidArgumentException when the rule has no URI or an unknown segment
+     */
     public static function fromString(string $rule): self
     {
         $segments = explode('::', $rule);
         $uri = array_shift($segments);
+
+        if ($uri === '') {
+            throw new InvalidArgumentException(sprintf('The proxy rule [%s] must start with the URI to proxy.', $rule));
+        }
 
         $exact = false;
         $cache = false;
@@ -42,35 +51,21 @@ final class ProxyRule
         $rewrite = [];
 
         foreach ($segments as $segment) {
-            if ($segment === 'exact') {
-                $exact = true;
-            }
+            [$name, $arguments] = self::segment($segment);
 
-            if ($segment === 'cache') {
-                $cache = true;
-            }
-
-            if (($arguments = self::arguments($segment, 'methods')) !== null) {
-                $methods = array_filter(explode(',', $arguments));
-                $methods = array_map('strtoupper', $methods);
-                $methods = array_values($methods);
-            }
-
-            if (($arguments = self::arguments($segment, 'middleware')) !== null) {
-                $middleware[] = $arguments;
-            }
-
-            if (($arguments = self::arguments($segment, 'replace')) !== null) {
-                [$search, $replace] = self::pair($arguments);
-
-                $replaces[$search] = $replace === '' ? null : $replace;
-            }
-
-            if (($arguments = self::arguments($segment, 'rewrite')) !== null) {
-                [$search, $replace] = self::pair($arguments);
-
-                $rewrite[$search] = $replace;
-            }
+            match ($name) {
+                'exact' => $exact = true,
+                'cache' => $cache = true,
+                'methods' => $methods = array_values(array_map('strtoupper', array_filter(explode(',', (string) $arguments)))),
+                'middleware' => $middleware[] = (string) $arguments,
+                'replace' => $replaces[self::pair($arguments)[0]] = self::pair($arguments)[1] === '' ? null : self::pair($arguments)[1],
+                'rewrite' => $rewrite[self::pair($arguments)[0]] = self::pair($arguments)[1],
+                default => throw new InvalidArgumentException(sprintf(
+                    'Unknown segment [%s] in the proxy rule [%s]. Expected one of: exact, cache, methods(...), middleware(...), replace(...), rewrite(...).',
+                    $segment,
+                    $rule
+                )),
+            };
         }
 
         return new self($uri, $exact, $cache, $methods, $middleware, $replaces, $rewrite);
@@ -111,24 +106,26 @@ final class ProxyRule
     }
 
     /**
-     * The content between the parentheses of "name(...)", or null when the
-     * segment is not that function.
+     * Split "name" or "name(arguments)" into its name and arguments. The
+     * arguments are null when the segment has no parentheses.
+     *
+     * @return array{string, string|null}
      */
-    private static function arguments(string $segment, string $name): ?string
+    private static function segment(string $segment): array
     {
-        if (!str_starts_with($segment, $name . '(') || !str_ends_with($segment, ')')) {
-            return null;
+        if (str_ends_with($segment, ')') && ($open = strpos($segment, '(')) !== false) {
+            return [substr($segment, 0, $open), substr($segment, $open + 1, -1)];
         }
 
-        return substr($segment, strlen($name) + 1, -1);
+        return [$segment, null];
     }
 
     /**
      * @return array{string, string}
      */
-    private static function pair(string $arguments): array
+    private static function pair(?string $arguments): array
     {
-        [$first, $second] = explode(',', $arguments . ',');
+        [$first, $second] = explode(',', (string) $arguments . ',');
 
         return [$first, $second];
     }
