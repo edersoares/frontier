@@ -7,29 +7,60 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  lint:
 
-    name: Unit Tests
+    name: Lint
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v7
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
-
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v6
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
       with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+        php-version: '8.5'
+        coverage: none
+
+    - name: Validate composer.json
+      run: composer validate --strict --no-check-lock
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest
+      run: composer install --prefer-dist --no-progress --no-interaction
+
+    - name: Run Pint
+      run: vendor/bin/pint --test
+
+  tests:
+
+    name: Tests (PHP ${{ matrix.php }}, Laravel ${{ matrix.laravel }})
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '8.4', '8.5' ]
+        laravel: [ '12', '13' ]
+        include:
+          - laravel: '12'
+            testbench: '^10'
+          - laravel: '13'
+            testbench: '^11'
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+        coverage: none
+
+    - name: Install dependencies
+      run: |
+        composer require "orchestra/testbench:${{ matrix.testbench }}" --dev --no-update --no-interaction
+        composer update --prefer-dist --no-progress --no-interaction
 
     - name: Run tests
       run: composer test
