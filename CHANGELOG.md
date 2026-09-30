@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- The proxy sends the raw body of write requests to the host with its original `Content-Type`. Before, the parsed input was re-encoded as JSON, so a form became JSON and nested JSON could change shape.
+
 - `FRONTIER_PROXY_REQUEST_HEADERS` and `FRONTIER_PROXY_RESPONSE_HEADERS` define which headers the proxy forwards in each direction. Defaults: `accept,accept-language,user-agent` to the host and `content-type,cache-control,etag,last-modified,content-disposition` back to the client. Before, only `Accept` went to the host and only `Content-Type` came back.
 
 - `Frontier::add()` validates the config and throws `InvalidArgumentException` for an unknown `type`, a missing `endpoint` or `view`, or a proxy without `host`. Proxy rules with an unknown segment or without a URI throw as well instead of being silently ignored.

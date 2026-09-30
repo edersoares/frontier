@@ -6,6 +6,7 @@ namespace Dex\Laravel\Frontier;
 
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response as ClientResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -48,9 +49,7 @@ final class FrontendProxyController
             ->timeout($config['timeout'])
             ->connectTimeout($config['connect_timeout']);
 
-        $options = in_array($method, ['GET', 'HEAD', 'OPTIONS'], true)
-            ? []
-            : ['json' => $request->all()];
+        [$http, $options] = $this->body($http, $request);
 
         try {
             $response = $http->send($method, $url, $options);
@@ -104,6 +103,33 @@ final class FrontendProxyController
         }
 
         return $url;
+    }
+
+    /**
+     * Attach the body of the incoming request, as received, with its content type.
+     *
+     * Requests without a raw body but with parsed input, as built by the
+     * Laravel test client, send the input as JSON.
+     *
+     * @return array{PendingRequest, array<string, mixed>}
+     */
+    private function body(PendingRequest $http, Request $request): array
+    {
+        if (in_array($request->getMethod(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+            return [$http, []];
+        }
+
+        $content = $request->getContent();
+
+        if ($content !== '') {
+            return [$http->withBody($content, $request->header('content-type', 'application/octet-stream')), []];
+        }
+
+        if ($request->all() !== []) {
+            return [$http, ['json' => $request->all()]];
+        }
+
+        return [$http, []];
     }
 
     /**
